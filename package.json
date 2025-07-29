@@ -1,0 +1,38 @@
+{
+  "name": "@kofeinstyle/tradernet-sdk",
+  "version": "0.1.0-alpha.0",
+  "type": "module",
+  "description": "Tradernet API javascript client",
+  "homepage": "https://github.com/kofeinstyle/tradernet-sdk",
+  "author": "Yefimov Maksym",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "prepublishOnly": "npm run build && npm test",
+    "prepublis": "npm publish --tag dev --access public",
+    "check": "tsc --noEmit"
+  },
+  "keywords": [
+    "Tradernet"
+  ],
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

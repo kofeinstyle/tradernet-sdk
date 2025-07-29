@@ -1,0 +1,10 @@
+.idea
+tsconfig.json
+jest.config.ts
+.gitignore
+.npmignore
+.env.local
+.env
+src/
+tests/
+coverage/
