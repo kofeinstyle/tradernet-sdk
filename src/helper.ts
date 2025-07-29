@@ -1,4 +1,4 @@
-import { QueryDateRange } from './types/api'
+import type { QueryDateRange } from './types/api'
 
 export function dateFormat(date: Date) {
   return date.toISOString().slice(0, 10)

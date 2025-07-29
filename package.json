@@ -1,38 +1,50 @@
 {
   "name": "@kofeinstyle/tradernet-sdk",
   "version": "0.1.0-alpha.0",
-  "type": "module",
+  "author": "Yefimov Maksym",
   "description": "Tradernet API javascript client",
   "homepage": "https://github.com/kofeinstyle/tradernet-sdk",
-  "author": "Yefimov Maksym",
   "license": "MIT",
+  "keywords": [
+    "Tradernet"
+  ],
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "build": "tsc",
+    "build": "npm run clean && tsc -p ./tsconfig.production.json && tsc-alias -p ./tsconfig.production.json",
     "build:watch": "tsc --watch",
     "prepublishOnly": "npm run build && npm test",
-    "prepublis": "npm publish --tag dev --access public",
+    "prepublis": "npm publish --tag alpha --access public",
+    "clean": "rimraf ./dist",
     "check": "tsc --noEmit"
   },
-  "keywords": [
-    "Tradernet"
+  "files": [
+    "dist",
+    "src"
   ],
-  "files": ["dist"],
+  "type": "module",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     }
+  },
+  "engines": {
+    "node": ">=22.0.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/jest": "^30.0.0",
     "jest": "^30.0.5",
     "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.8.3"
   }
 }

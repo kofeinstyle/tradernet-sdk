@@ -1,3 +1,5 @@
+'use strict'
+
 import { TradernetApiClient } from '../src'
 import { makeDateRange } from '../src/helper'
 

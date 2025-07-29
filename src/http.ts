@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig } from './types/api'
+import type { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig } from './types/api'
 
 type RequestHeaders = {
   'Content-Type': string
