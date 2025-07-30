@@ -1,6 +1,6 @@
 {
   "name": "@kofeinstyle/tradernet-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Yefimov Maksym",
   "description": "Tradernet API javascript client",
   "homepage": "https://github.com/kofeinstyle/tradernet-sdk",
