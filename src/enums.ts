@@ -1,5 +1,5 @@
 //https://tradernet.ua/tradernet-api/instruments
-export const Instruments = {
+export const Instrument = {
   STOCKS: 1,
   BONDS: 2,
   FUTURES: 3,
@@ -14,7 +14,7 @@ export const Instruments = {
   CURRENCY_SWAP: 14, // swap fiat
 } as const
 
-export const Operations = {
+export const TradeOperation = {
   BUY: 'buy',
   SELL: 'sell',
 } as const

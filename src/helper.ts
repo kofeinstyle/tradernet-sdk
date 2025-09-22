@@ -20,3 +20,7 @@ export function makeDateRange(): QueryDateRange {
     dateTo: dateFormat(new Date(`${date.getFullYear()}-12-31T23:59:59.999Z`)).toString(),
   }
 }
+
+export function useRealFetch() {
+  return !!process.env.USE_REAL_FETCH
+}

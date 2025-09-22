@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import type { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig } from './types/api'
+import { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig, UserCashFlowsParams } from './types/api'
 
 type RequestHeaders = {
   'Content-Type': string
@@ -7,9 +7,11 @@ type RequestHeaders = {
   'X-NtApi-PublicKey': string
 }
 
+type RequestParams = ReportQueryParams | UserCashFlowsParams
+
 type RequestPayload = {
   cmd: ApiCommand
-  params: ReportQueryParams
+  params: RequestParams
   apiKey: string
   nonce: number
 }
@@ -29,11 +31,7 @@ export class HttpClient {
     this.retries = config.retries || 3
   }
 
-  public async makeRequest<T>(
-    cmd: ApiCommand,
-    params: ReportQueryParams,
-    attempt: number = 1
-  ): Promise<ApiResponse<T>> {
+  public async makeRequest<T>(cmd: ApiCommand, params: RequestParams, attempt: number = 1): Promise<ApiResponse<T>> {
     const payload: RequestPayload = {
       cmd: cmd,
       params,

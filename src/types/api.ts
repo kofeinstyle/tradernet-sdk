@@ -1,4 +1,8 @@
-import type { FiatCurrency, Instrument, TradeOperation } from './common'
+import { CashFlowItem, FiatCurrency, FilterOperator, TradeItem, TransactionTypeCode } from './common'
+
+export type { TradeItem } from './common'
+
+export type ApiCommand = 'getBrokerReport' | 'getUserCashFlows'
 
 export interface TradernetConfig {
   apiKey: string
@@ -16,10 +20,6 @@ export interface ApiResponse<T = any> {
   message?: string
 }
 
-export type ApiCommand = 'getBrokerReport'
-
-export type RequestParams = ReportQueryParams
-
 export type ReportQueryParams = {
   date_end: string
   date_start: string
@@ -27,53 +27,24 @@ export type ReportQueryParams = {
   type: 'corporate_actions' | 'account_at_end' | 'commissions' | 'trades'
 }
 
+export type UserCashFlowsParamsFilter = {
+  field: string
+  operator: FilterOperator
+  value: TransactionTypeCode | string
+}
+export type UserCashFlowsParams = {
+  without_refund?: number | null
+  take?: number | null
+  groupByType?: number | null
+  skip?: number | null
+  filters?: UserCashFlowsParamsFilter[] | null
+  sort?: [] | null
+}
+
 export type QueryDateRange = {
   dateFrom: string
   dateTo: string
 }
-
-export type TradeItem = {
-  id: string
-  trade_id: number
-  transaction_id: number
-  date: string
-  short_date: string // '2025-01-14',
-  pay_d: string // '2025-01-15',
-  order_id: string
-  operation: TradeOperation
-  commission: number
-  commission_currency: FiatCurrency
-  q: number // quantity
-  p: number // price
-  summ: number // sum
-  instr_nm: string // 'AAPL.US',
-  instr_type: Instrument
-  instr_kind: string
-  issue_nb: string
-  curr_c: FiatCurrency
-  comment?: string
-  broker: string
-  isin: string
-  das_exe_id?: string
-  mkt_id?: number
-  mkt_name?: string
-}
-
-//   turnover: '0.00000000',
-//   profit: 0,
-//   fifo_profit: '0.00000000',
-//   repo_operation: null,
-//   office: 35,
-//   yield: null,
-//   offbalance: 0,
-//   otc: 0,
-//   is_dvp: 0,
-//   stamp_tax: null,
-//   smat: 0,
-//   forts_exchange_fee: null,
-//   trade_nb: 'das_20250114_-T13424',
-//   market: 'N',
-//   itc_trd_match_id: null,
 
 export type ReportResponse<T = TradeItem> = {
   report: {
@@ -84,4 +55,12 @@ export type ReportResponse<T = TradeItem> = {
   }
 }
 
+export type CashFlowResponse = {
+  total: number
+  cashflow: CashFlowItem[]
+  cash_totals?: any[]
+  limits?: Record<string, { minimum: number; maximum: number; multiplicity: number; blockchain?: number }>
+}
+
 export type BrokerTradesResponse = ApiResponse<ReportResponse>
+export type UserCashFlowResponse = ApiResponse<CashFlowResponse>

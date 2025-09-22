@@ -1,5 +1,14 @@
 import { HttpClient } from './http'
-import type { BrokerTradesResponse, QueryDateRange, ReportResponse, RequestParams, TradernetConfig } from './types/api'
+import type {
+  BrokerTradesResponse,
+  CashFlowResponse,
+  QueryDateRange,
+  ReportQueryParams,
+  ReportResponse,
+  TradernetConfig,
+  UserCashFlowResponse,
+  UserCashFlowsParams,
+} from './types/api'
 
 export class TradernetApiClient {
   private httpClient: HttpClient
@@ -9,7 +18,7 @@ export class TradernetApiClient {
   }
 
   async getBrokerTrades(dateRange: QueryDateRange, attempt: number = 1): Promise<BrokerTradesResponse> {
-    const payload: RequestParams = {
+    const payload: ReportQueryParams = {
       date_start: dateRange.dateFrom,
       date_end: dateRange.dateTo,
       time_period: '23:59:59',
@@ -22,7 +31,35 @@ export class TradernetApiClient {
       success: result.success,
       error: result.error,
       message: result.message,
-      data: result.data ?? null,
+      data: {
+        report: {
+          detailed: result.data!.report.detailed,
+          securities: result.data!.report.securities,
+          prtotal: result.data!.report.prtotal,
+          total: result.data!.report.total,
+        },
+      },
+    }
+  }
+
+  async getUserCashFlows(params?: UserCashFlowsParams): Promise<UserCashFlowResponse> {
+    const payload: UserCashFlowsParams = params ? { ...params } : { take: null }
+    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload)
+
+    return {
+      success: result.success,
+      error: result.error,
+      message: result.message,
+      data: {
+        limits: result.data?.limits,
+        cash_totals: result.data?.cash_totals!,
+        total: Number(result.data?.total || 0),
+        cashflow: result.data?.cashflow.map(item => {
+          item.sumRaw = Number(item.sumRaw)
+          item.sum = Number(item.sum)
+          return item
+        })!,
+      },
     }
   }
 

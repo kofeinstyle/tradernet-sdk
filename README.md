@@ -4,9 +4,12 @@ A comprehensive TypeScript/JavaScript client library for the Tradernet trading p
 
 [![npm version](https://img.shields.io/npm/v/@kofeinstyle/tradernet-sdk.svg)](https://www.npmjs.com/package/@kofeinstyle/tradernet-sdk)
 
+### Docs - https://tradernet.ua/tradernet-api
+
 ## Features
 
 - 💼 **Report Data** - Data array on trades for the requested report period
+- 📝 **User Cash flow** - Obtaining data on the client's cash flow
 - 📊 **Market Data** - Real-time and historical market data (🔮 Coming Soon)
 - 💼 **Portfolio** - Portfolio and position tracking (🔮 Coming Soon)
 - 🔌 **WebSocket** - Real-time data streaming with auto-reconnection (🔮 Coming Soon)
