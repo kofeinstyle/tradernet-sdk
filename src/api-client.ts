@@ -1,10 +1,11 @@
 import { HttpClient } from './http'
-import type {
-  BrokerTradesResponse,
+import {
+  BrokerReportResponse,
   CashFlowResponse,
   QueryDateRange,
   ReportQueryParams,
-  ReportResponse,
+  ReportQueryResult,
+  ReportQueryType,
   TradernetConfig,
   UserCashFlowResponse,
   UserCashFlowsParams,
@@ -17,34 +18,30 @@ export class TradernetApiClient {
     this.httpClient = new HttpClient(config)
   }
 
-  async getBrokerTrades(dateRange: QueryDateRange, attempt: number = 1): Promise<BrokerTradesResponse> {
+  async getBrokerReport<T extends ReportQueryType>(
+    dateRange: QueryDateRange,
+    type: T,
+    attempt: number = 1
+  ): Promise<BrokerReportResponse<T>> {
     const payload: ReportQueryParams = {
       date_start: dateRange.dateFrom,
       date_end: dateRange.dateTo,
       time_period: '23:59:59',
-      type: 'trades',
+      type: type,
     }
-
-    const result = await this.httpClient.makeRequest<ReportResponse>('getBrokerReport', payload, attempt)
+    const result = await this.httpClient.makeRequest<ReportQueryResult<T>>('getBrokerReport', payload, attempt)
 
     return {
       success: result.success,
       error: result.error,
       message: result.message,
-      data: {
-        report: {
-          detailed: result.data!.report.detailed,
-          securities: result.data!.report.securities,
-          prtotal: result.data!.report.prtotal,
-          total: result.data!.report.total,
-        },
-      },
+      data: result.data,
     }
   }
 
-  async getUserCashFlows(params?: UserCashFlowsParams): Promise<UserCashFlowResponse> {
+  async getUserCashFlows(params?: UserCashFlowsParams, attempt: number = 1): Promise<UserCashFlowResponse> {
     const payload: UserCashFlowsParams = params ? { ...params } : { take: null }
-    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload)
+    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload, attempt)
 
     return {
       success: result.success,
@@ -52,7 +49,7 @@ export class TradernetApiClient {
       message: result.message,
       data: {
         limits: result.data?.limits,
-        cash_totals: result.data?.cash_totals!,
+        cash_totals: result.data?.cash_totals,
         total: Number(result.data?.total || 0),
         cashflow: result.data?.cashflow.map(item => {
           item.sumRaw = Number(item.sumRaw)

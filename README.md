@@ -34,11 +34,19 @@ const client = new TradernetApiClient({
   apiKey: 'testApiKey',
   apiSecret: 'testApiSecret',
 });
+```
 
-// Get report data
+* #### Get report data
+```javascript
 const result = await client.getBrokerTrades({dateFrom: '2025-01-01', dateTo: '2025-21-31'});
-console.log('Report data:', ticker.data);
+console.log('Report data:', result.data);
+```
 
+* #### Get user cash flow data
+```javascript
+const filter = [{ field: 'type_code', operator: 'eq', value: 'dividend'}]
+const result = await client.getUserCashFlows({take: 100, skip: 0, filter: filter});
+console.log('Cashflow data:', result.data.cashflow);
 ```
 
 [//]: # (## WebSocket Real-time Data &#40;to be implemented&#41;)
@@ -88,6 +96,7 @@ console.log('Report data:', ticker.data);
 
 ### Reports
 - `getBrokerTrades(dateRange, attempt)` - Getting the broker's report by date range
+- `getUserCashFlows(params)` - Getting the user's cash flow by filter. (Like tax, dividend, etc)
 
 ### Market Data (🚧 Planned for Future Versions)
 - `getTicker(symbol)` - Get ticker data for a symbol

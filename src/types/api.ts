@@ -1,6 +1,11 @@
-import { CashFlowItem, FiatCurrency, FilterOperator, TradeItem, TransactionTypeCode } from './common'
-
-export type { TradeItem } from './common'
+import type {
+  CashFlowItem,
+  CorporateActionsItem,
+  FiatCurrency,
+  FilterOperator,
+  TradeItem,
+  TransactionTypeCode,
+} from './common'
 
 export type ApiCommand = 'getBrokerReport' | 'getUserCashFlows'
 
@@ -20,20 +25,32 @@ export interface ApiResponse<T = any> {
   message?: string
 }
 
+export type ReportQueryType =
+  | 'corporate_actions'
+  | 'account_at_end'
+  | 'commissions'
+  | 'trades'
+  | 'cash_flows'
+  | 'securities_flows'
+
 export type ReportQueryParams = {
   date_end: string
   date_start: string
   time_period: string
-  type: 'corporate_actions' | 'account_at_end' | 'commissions' | 'trades'
+  type: ReportQueryType
 }
 
 export type UserCashFlowsParamsFilter = {
-  field: string
+  field: 'type_code' | 'date' | 'currency'
   operator: FilterOperator
   value: TransactionTypeCode | string
 }
+
 export type UserCashFlowsParams = {
+  user_id?: number | null
   without_refund?: number | null
+  hide_limits?: number | null
+  cash_totals?: number | null
   take?: number | null
   groupByType?: number | null
   skip?: number | null
@@ -46,15 +63,6 @@ export type QueryDateRange = {
   dateTo: string
 }
 
-export type ReportResponse<T = TradeItem> = {
-  report: {
-    detailed: T[]
-    securities: Record<string, number>
-    prtotal: any[]
-    total: Record<FiatCurrency, number>
-  }
-}
-
 export type CashFlowResponse = {
   total: number
   cashflow: CashFlowItem[]
@@ -62,5 +70,29 @@ export type CashFlowResponse = {
   limits?: Record<string, { minimum: number; maximum: number; multiplicity: number; blockchain?: number }>
 }
 
-export type BrokerTradesResponse = ApiResponse<ReportResponse>
+export type ReportResponse<T> = {
+  report: {
+    detailed: T[]
+    total: Record<FiatCurrency, number>
+    securities?: Record<string, number>
+    prtotal?: any[]
+  }
+}
+
+type PickReportFields<T, K extends keyof ReportResponse<T>['report']> = {
+  report: Pick<ReportResponse<T>['report'], K>
+}
+
+type ReportQueryResultMap = {
+  trades: ReportResponse<TradeItem>
+  corporate_actions: PickReportFields<ReportResponse<CorporateActionsItem>, 'detailed' | 'total'>
+  account_at_end: any
+  commissions: any
+  cash_flows: any
+  securities_flows: any
+}
+
+export type ReportQueryResult<T extends ReportQueryType> = ReportQueryResultMap[T]
+
+export type BrokerReportResponse<T extends ReportQueryType> = ApiResponse<ReportQueryResult<T>>
 export type UserCashFlowResponse = ApiResponse<CashFlowResponse>

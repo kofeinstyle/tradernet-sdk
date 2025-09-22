@@ -1,6 +1,6 @@
 {
   "name": "@kofeinstyle/tradernet-sdk",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Tradernet API javascript client",
   "homepage": "https://github.com/kofeinstyle/tradernet-sdk",
   "license": "MIT",
@@ -17,6 +17,7 @@
     "build:watch": "tsc --watch",
     "prepublishOnly": "npm run build && npm test",
     "prepublish": "npm publish --tag alpha --access public",
+    "latest": "npm dist-tag add @kofeinstyle/tradernet-sdk@0.1.0-alpha.4 latest",
     "clean": "rimraf ./dist",
     "check": "tsc --noEmit"
   },
@@ -26,10 +27,10 @@
   ],
   "type": "module",
   "main": "./dist/index.js",
-  "types": "./dist/types.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     }

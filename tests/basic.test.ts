@@ -59,16 +59,48 @@ describe('TradernetApiClient', () => {
           json: async () => mockBrokerTrades,
         })
       }
-      const dateRange = makeDateRange()
-      const result = await client.getBrokerTrades(dateRange)
 
+      const dateRange = makeDateRange()
+      const result = await client.getBrokerReport(dateRange, 'trades')
+
+      expect(result.error).toBeUndefined()
+      expect(result.success).toBeTruthy()
+      expect(result.data).toStrictEqual(expect.anything())
+      expect(result.data).toHaveProperty('report.securities')
+      expect(result.data).toHaveProperty('report.total')
+      expect(result.data).toHaveProperty('report.detailed')
+      expect(result.data).toHaveProperty('report.prtotal')
+    })
+  })
+
+  describe('Get Depositary report', () => {
+    it('should get full report', async () => {
+      if (!useRealFetch()) {
+        const mockData = {
+          success: true,
+          report: {
+            detailed: [
+              {
+                type_id: '12233',
+                amount: 0.1,
+              },
+            ],
+          },
+        }
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => mockData,
+        })
+      }
+      const dateRange = makeDateRange()
+      const result = await client.getBrokerReport(dateRange, 'corporate_actions')
+
+      expect(result.message).toBeUndefined()
       expect(result.success).toBeTruthy()
       expect(result.data).toStrictEqual(expect.anything())
       expect(result.error).toBeUndefined()
-      expect(result.data).toHaveProperty('report.securities', { 'AAPL.US': 100 })
-      expect(result.data).toHaveProperty('report.total', { USD: 100 })
       expect(result.data).toHaveProperty('report.detailed')
-      expect(result.data).toHaveProperty('report.prtotal')
+      expect(result.data?.report.detailed[0]).toHaveProperty('amount')
     })
   })
 

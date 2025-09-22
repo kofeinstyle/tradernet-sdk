@@ -60,13 +60,21 @@ export type TradeItem = {
   //   itc_trd_match_id: null,
 }
 
+export type CorporateActionsItem = {
+  type_id: string
+  type: string
+  date: string
+  amount: number
+  amount_per_one: number
+}
+
 export type CashFlowItem = {
   id: number
   type_code: TransactionTypeCode | string
   date: string
   datetime: string
   currency: FiatCurrency
-  comment: string // 'Corporate action tax on security ( ITA.US ), record date 2025-09-16 . Tax rate 15 Balance on the record date is 10'
+  comment: string
   account: string
   sum: number
   min_step: string
