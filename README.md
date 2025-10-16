@@ -2,6 +2,7 @@
 
 A comprehensive TypeScript/JavaScript client library for the Tradernet trading platform API.
 
+[![Publish Package to npmjs](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml/badge.svg)](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml)
 [![npm version](https://img.shields.io/npm/v/@kofeinstyle/tradernet-sdk.svg)](https://www.npmjs.com/package/@kofeinstyle/tradernet-sdk)
 
 ### Docs - https://tradernet.ua/tradernet-api
@@ -181,10 +182,6 @@ npm run build
 # Build in watch mode
 npm run build:watch
 
-
-- "prepublishOnly": "npm run build && npm test",
-- "prepublish": "npm publish --tag alpha --access public",
-- "latest": "npm dist-tag add @kofeinstyle/tradernet-sdk@0.1.0-alpha.4 latest",
 ```
 
 ## Contributing

@@ -21,6 +21,8 @@
     "build_old": "npm run clean && tsc -p ./tsconfig.production.json && tsc-alias -p ./tsconfig.production.json",
     "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist",
     "build:watch": "tsc --watch",
+    "prepublishOnly": "npm run build && npm test",
+    "latest": "npm dist-tag add @kofeinstyle/tradernet-sdk@1.0.0 latest",
     "clean": "rimraf ./dist",
     "check": "tsc --noEmit"
   },
