@@ -1,13 +1,18 @@
 {
   "name": "@kofeinstyle/tradernet-sdk",
   "version": "0.1.0-alpha.5",
-  "description": "Tradernet API javascript client",
+  "description": "Tradernet API typescript client",
   "homepage": "https://github.com/kofeinstyle/tradernet-sdk",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kofeinstyle/tradernet-sdk.git"
+  },
   "keywords": [
     "Tradernet",
     "typescript",
-    "broker"
+    "broker",
+    "freedom-finance"
   ],
   "scripts": {
     "test": "jest",
