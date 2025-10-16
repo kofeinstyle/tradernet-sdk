@@ -1,7 +1,7 @@
-import { Instrument, TradeOperation } from '../enums'
+import type { InstrumentValue, TradeOperationValue } from '../enums'
 
-export type TradeOperation = (typeof TradeOperation)[keyof typeof TradeOperation]
-export type Instrument = (typeof Instrument)[keyof typeof Instrument]
+export { InstrumentValue, TradeOperationValue }
+
 export type FiatCurrency = 'USD' | 'EUR'
 
 export type FilterOperator =
@@ -26,14 +26,14 @@ export type TradeItem = {
   short_date: string // '2025-01-14',
   pay_d: string // '2025-01-15',
   order_id: string
-  operation: TradeOperation
+  operation: TradeOperationValue
   commission: number
   commission_currency: FiatCurrency
   q: number // quantity
   p: number // price
   summ: number // sum
   instr_nm: string // 'AAPL.US',
-  instr_type: Instrument
+  instr_type: InstrumentValue
   instr_kind: string
   issue_nb: string
   curr_c: FiatCurrency

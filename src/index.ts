@@ -10,8 +10,8 @@ export type {
 
 export type {
   FiatCurrency,
-  TradeOperation,
-  Instrument,
+  TradeOperationValue,
+  InstrumentValue,
   FilterOperator,
   TransactionTypeCode,
   TradeItem,

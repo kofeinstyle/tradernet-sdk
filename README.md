@@ -180,6 +180,11 @@ npm run build
 
 # Build in watch mode
 npm run build:watch
+
+
+- "prepublishOnly": "npm run build && npm test",
+- "prepublish": "npm publish --tag alpha --access public",
+- "latest": "npm dist-tag add @kofeinstyle/tradernet-sdk@0.1.0-alpha.4 latest",
 ```
 
 ## Contributing

@@ -18,3 +18,6 @@ export const TradeOperation = {
   BUY: 'buy',
   SELL: 'sell',
 } as const
+
+export type TradeOperationValue = (typeof TradeOperation)[keyof typeof TradeOperation]
+export type InstrumentValue = (typeof Instrument)[keyof typeof Instrument]

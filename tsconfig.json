@@ -12,5 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "outDir": "./dist",
-  },
+    "removeComments": true
+  }
 }
