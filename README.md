@@ -39,7 +39,7 @@ const client = new TradernetApiClient({
 
 * #### Get report data
 ```javascript
-const result = await client.getBrokerTrades({dateFrom: '2025-01-01', dateTo: '2025-21-31'});
+const result = await client.getBrokerReport({dateFrom: '2025-01-01', dateTo: '2025-21-31'});
 console.log('Report data:', result.data);
 ```
 
@@ -96,7 +96,7 @@ console.log('Cashflow data:', result.data.cashflow);
 ## API Methods
 
 ### Reports
-- `getBrokerTrades(dateRange, attempt)` - Getting the broker's report by date range
+- `getBrokerReport(dateRange, attempt)` - Getting the broker's report by date range
 - `getUserCashFlows(params)` - Getting the user's cash flow by filter. (Like tax, dividend, etc)
 
 ### Market Data (🚧 Planned for Future Versions)

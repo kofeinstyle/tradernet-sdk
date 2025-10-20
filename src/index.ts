@@ -6,6 +6,7 @@ export type {
   CashFlowResponse,
   QueryDateRange,
   ReportQueryType,
+  ApiResponse,
 } from './types/api'
 
 export type {

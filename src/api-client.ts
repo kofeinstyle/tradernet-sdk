@@ -1,5 +1,5 @@
 import { HttpClient } from './http'
-import {
+import type {
   BrokerReportResponse,
   CashFlowResponse,
   QueryDateRange,

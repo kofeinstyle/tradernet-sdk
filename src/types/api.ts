@@ -79,13 +79,16 @@ export type ReportResponse<T> = {
   }
 }
 
-type PickReportFields<T, K extends keyof ReportResponse<T>['report']> = {
-  report: Pick<ReportResponse<T>['report'], K>
+export type ReportResponseShort<T> = {
+  report: {
+    detailed: T[]
+    total: Record<FiatCurrency, number>
+  }
 }
 
 type ReportQueryResultMap = {
   trades: ReportResponse<TradeItem>
-  corporate_actions: PickReportFields<ReportResponse<CorporateActionsItem>, 'detailed' | 'total'>
+  corporate_actions: ReportResponseShort<CorporateActionsItem>
   account_at_end: any
   commissions: any
   cash_flows: any

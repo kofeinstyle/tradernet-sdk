@@ -3,7 +3,7 @@ name: Publish Package to npmjs
 on:
   push:
     tags:
-      - '0.1.0-alpha.*'
+      - '0.0.1-*'
 
 jobs:
   publish:
