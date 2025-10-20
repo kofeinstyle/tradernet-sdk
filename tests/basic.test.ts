@@ -18,11 +18,11 @@ describe('TradernetApiClient', () => {
       timeout: 5000,
       retries: 0,
     })
-    jest.clearAllMocks()
   })
 
   afterEach(() => {
     jest.clearAllTimers()
+    jest.clearAllMocks()
   })
 
   describe('Constructor', () => {
@@ -73,18 +73,30 @@ describe('TradernetApiClient', () => {
     })
   })
 
-  describe('Get Depositary report', () => {
+  describe('Get Depositary corporate_actions report', () => {
     it('should get full report', async () => {
       if (!useRealFetch()) {
+        const item = {
+          amount: 10,
+          type_id: 'dividend',
+          date: '2020-01-10',
+          amount_per_one: 0,
+          ticker: 'AAPL.US',
+          isin: 'US0378331005',
+          corporate_action_id: '2020-01-01_35_AAPL.US_0.25',
+          ex_date: '2020-01-01',
+          currency: 'USD',
+          external_tax: 10,
+          external_tax_currency: 'USD',
+          tax_amount: '-',
+          tax_currency: '',
+          q_on_ex_date: '100.00000000',
+          comment: 'Test comment',
+        }
         const mockData = {
           success: true,
           report: {
-            detailed: [
-              {
-                type_id: '12233',
-                amount: 0.1,
-              },
-            ],
+            detailed: [item],
           },
         }
         ;(fetch as jest.Mock).mockResolvedValueOnce({
@@ -101,6 +113,9 @@ describe('TradernetApiClient', () => {
       expect(result.error).toBeUndefined()
       expect(result.data).toHaveProperty('report.detailed')
       expect(result.data?.report.detailed[0]).toHaveProperty('amount')
+      expect(result.data?.report.detailed[0]).toHaveProperty('tax_amount')
+      expect(result.data?.report.detailed[0]).toHaveProperty('tax_currency')
+      expect(result.data?.report.detailed[0].tax_amount).toEqual(0)
     })
   })
 

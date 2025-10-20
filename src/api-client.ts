@@ -39,9 +39,9 @@ export class TradernetApiClient {
       'report' in result.data &&
       'detailed' in result.data.report
     ) {
-      result.data.report.detailed = result.data.report.detailed.map((item: object) => {
+      result.data.report.detailed = result.data.report.detailed.map((item: object) =>
         normalizeCorporateActionsItem(item)
-      })
+      )
     }
 
     return {
