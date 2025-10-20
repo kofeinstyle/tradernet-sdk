@@ -1,4 +1,5 @@
 import { HttpClient } from './http'
+import { normalizeCorporateActionsItem } from './mappers'
 import type {
   BrokerReportResponse,
   CashFlowResponse,
@@ -30,6 +31,18 @@ export class TradernetApiClient {
       type: type,
     }
     const result = await this.httpClient.makeRequest<ReportQueryResult<T>>('getBrokerReport', payload, attempt)
+
+    if (
+      result.success &&
+      type === 'corporate_actions' &&
+      result.data &&
+      'report' in result.data &&
+      'detailed' in result.data.report
+    ) {
+      result.data.report.detailed = result.data.report.detailed.map((item: object) => {
+        normalizeCorporateActionsItem(item)
+      })
+    }
 
     return {
       success: result.success,

@@ -2,7 +2,7 @@ import type { InstrumentValue, TradeOperationValue } from '../enums'
 
 export { InstrumentValue, TradeOperationValue }
 
-export type FiatCurrency = 'USD' | 'EUR' | 'UAH'
+export type FiatCurrency = 'USD' | 'EUR'
 
 export type FilterOperator =
   | 'eq'
@@ -65,7 +65,6 @@ export type CorporateActionsItem = {
   isin: string
   corporate_action_id: string
   type_id: 'dividend'
-  type: string
   date: string
   ex_date: string
   amount: number
@@ -73,8 +72,8 @@ export type CorporateActionsItem = {
   currency: FiatCurrency
   external_tax: number
   external_tax_currency: FiatCurrency
-  tax_amount: number | string
-  tax_currency: FiatCurrency | string
+  tax_amount: number
+  tax_currency: FiatCurrency
   q_on_ex_date: string
   comment: string
 }
