@@ -19,5 +19,13 @@ export const TradeOperation = {
   SELL: 'sell',
 } as const
 
+export const CorporateActionTypes = {
+  DIVIDEND: 'dividend',
+  DIVIDEND_REVERTED: 'dividend_reverted',
+  SPLIT: 'split',
+} as const
+
+export type CorporateActionTypesValue = (typeof CorporateActionTypes)[keyof typeof CorporateActionTypes]
+
 export type TradeOperationValue = (typeof TradeOperation)[keyof typeof TradeOperation]
 export type InstrumentValue = (typeof Instrument)[keyof typeof Instrument]

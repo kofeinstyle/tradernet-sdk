@@ -1,6 +1,11 @@
-import type { InstrumentValue, TradeOperationValue } from '../enums'
+import {
+  CorporateActionTypes,
+  type CorporateActionTypesValue,
+  type InstrumentValue,
+  type TradeOperationValue,
+} from '../enums'
 
-export { InstrumentValue, TradeOperationValue }
+export { InstrumentValue, TradeOperationValue, CorporateActionTypesValue, CorporateActionTypes }
 
 export type FiatCurrency = 'USD' | 'EUR'
 
@@ -64,7 +69,7 @@ export type CorporateActionsItem = {
   ticker: string
   isin: string
   corporate_action_id: string
-  type_id: 'dividend'
+  type_id: CorporateActionTypesValue
   date: string
   ex_date: string
   amount: number
