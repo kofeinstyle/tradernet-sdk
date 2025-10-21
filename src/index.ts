@@ -1,5 +1,7 @@
 export { TradernetApiClient } from './api-client'
 
+export { CorporateActionTypes, Instrument, TradeOperation } from './enums'
+
 export type {
   TradernetConfig,
   BrokerReportResponse,
@@ -13,6 +15,7 @@ export type {
   FiatCurrency,
   TradeOperationValue,
   InstrumentValue,
+  CorporateActionTypesValue,
   FilterOperator,
   TransactionTypeCode,
   TradeItem,

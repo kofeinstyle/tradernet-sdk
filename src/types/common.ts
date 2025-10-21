@@ -1,11 +1,6 @@
-import {
-  CorporateActionTypes,
-  type CorporateActionTypesValue,
-  type InstrumentValue,
-  type TradeOperationValue,
-} from '../enums'
+import type { CorporateActionTypesValue, InstrumentValue, TradeOperationValue } from '../enums'
 
-export { InstrumentValue, TradeOperationValue, CorporateActionTypesValue, CorporateActionTypes }
+export { CorporateActionTypesValue, InstrumentValue, TradeOperationValue }
 
 export type FiatCurrency = 'USD' | 'EUR'
 
