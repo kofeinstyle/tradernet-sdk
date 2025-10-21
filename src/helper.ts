@@ -1,5 +1,12 @@
 import type { QueryDateRange } from './types/api'
 
+export class TradernetRequestLimitError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'RequestLimitError'
+  }
+}
+
 export function dateFormat(date: Date) {
   return date.toISOString().slice(0, 10)
 }
@@ -23,4 +30,23 @@ export function makeDateRange(): QueryDateRange {
 
 export function useRealFetch() {
   return !!process.env.USE_REAL_FETCH
+}
+
+export interface ApiError {
+  errMsg: string
+  error: string
+  code: number
+}
+
+export function isTradernetError(error: unknown): error is ApiError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'errMsg' in error &&
+    typeof error.errMsg === 'string' &&
+    'error' in error &&
+    typeof error.error === 'string' &&
+    'code' in error &&
+    typeof error.code === 'number'
+  )
 }

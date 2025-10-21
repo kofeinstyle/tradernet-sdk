@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import { TradernetRequestLimitError, isTradernetError } from './helper'
 import { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig, UserCashFlowsParams } from './types/api'
 
 type RequestHeaders = {
@@ -27,7 +28,7 @@ export class HttpClient {
     this.apiKey = config.apiKey
     this.apiSecret = config.apiSecret
     this.baseUrl = config.baseUrl || 'https://tradernet.com/api'
-    this.timeout = config.timeout || 30000
+    this.timeout = config.timeout || 60000
     this.retries = config.retries || 3
   }
 
@@ -63,6 +64,9 @@ export class HttpClient {
       const responseData = await response.json()
 
       if (responseData.error) {
+        if (isTradernetError(responseData) && responseData.code === 429) {
+          throw new TradernetRequestLimitError(responseData.errMsg)
+        }
         return {
           success: false,
           error: 'Freedom API error',
@@ -76,13 +80,15 @@ export class HttpClient {
       }
     } catch (error) {
       if (attempt < this.retries && this.shouldRetry(error)) {
-        // await this.delay(Math.pow(2, attempt) * 1000); // Exponential backoff
+        const delayMs = Math.pow(2, attempt) * 3000
+        await this.delay(delayMs) // Exponential backoff
         return this.makeRequest<T>(cmd, params, attempt + 1)
       }
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown Freedom API error',
+        errorObject: error instanceof Error ? error : null,
       }
     } finally {
     }
@@ -130,11 +136,16 @@ export class HttpClient {
   }
 
   private shouldRetry(error: any): boolean {
-    // Retry on network errors, timeouts, and 5xx status codes
+    // Retry on network errors, timeouts, and 5xx, 429 status codes,
     return (
       error.name === 'AbortError' ||
       error.name === 'TypeError' ||
+      error.name === 'RequestLimitError' ||
       (error.status && error.status >= 500 && error.status < 600)
     )
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms))
   }
 }

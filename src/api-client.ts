@@ -21,8 +21,7 @@ export class TradernetApiClient {
 
   async getBrokerReport<T extends ReportQueryType>(
     dateRange: QueryDateRange,
-    type: T,
-    attempt: number = 1
+    type: T
   ): Promise<BrokerReportResponse<T>> {
     const payload: ReportQueryParams = {
       date_start: dateRange.dateFrom,
@@ -30,7 +29,7 @@ export class TradernetApiClient {
       time_period: '23:59:59',
       type: type,
     }
-    const result = await this.httpClient.makeRequest<ReportQueryResult<T>>('getBrokerReport', payload, attempt)
+    const result = await this.httpClient.makeRequest<ReportQueryResult<T>>('getBrokerReport', payload, 1)
 
     if (
       result.success &&
@@ -52,9 +51,9 @@ export class TradernetApiClient {
     }
   }
 
-  async getUserCashFlows(params?: UserCashFlowsParams, attempt: number = 1): Promise<UserCashFlowResponse> {
+  async getUserCashFlows(params?: UserCashFlowsParams): Promise<UserCashFlowResponse> {
     const payload: UserCashFlowsParams = params ? { ...params } : { take: null }
-    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload, attempt)
+    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload, 1)
 
     return {
       success: result.success,

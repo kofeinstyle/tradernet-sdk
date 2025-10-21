@@ -1,4 +1,4 @@
-import { dateFormat, getFullDate, getFullMonth, makeDateRange } from '../src/helper'
+import { dateFormat, getFullDate, getFullMonth, isTradernetError, makeDateRange } from '../src/helper'
 
 describe('Helper', () => {
   it('getFullMonth', async () => {
@@ -23,5 +23,15 @@ describe('Helper', () => {
     const range = makeDateRange()
     expect(range.dateFrom).toBe(date.getFullYear() + '-01-01')
     expect(range.dateTo).toBe(date.getFullYear() + '-12-31')
+  })
+
+  it('isTradernetError', async () => {
+    const error = {
+      error: 'Your request limit has been exceeded. Please try again later',
+      errMsg: 'Your request limit has been exceeded. Please try again later',
+      code: 429,
+    }
+
+    expect(isTradernetError(error)).toBe(true)
   })
 })

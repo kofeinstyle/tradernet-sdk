@@ -22,6 +22,7 @@ export interface ApiResponse<T = any> {
   success: boolean
   data?: T | null
   error?: string
+  errorObject?: Error | null
   message?: string
 }
 
