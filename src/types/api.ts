@@ -15,6 +15,7 @@ export interface TradernetConfig {
   baseUrl?: string
   timeout?: number
   retries?: number
+  verbose?: boolean
 }
 
 // API Response types
@@ -37,7 +38,7 @@ export type ReportQueryType =
 export type ReportQueryParams = {
   date_end: string
   date_start: string
-  time_period: string
+  time_period: string | null
   type: ReportQueryType
 }
 
@@ -59,9 +60,10 @@ export type UserCashFlowsParams = {
   sort?: [] | null
 }
 
-export type QueryDateRange = {
+export type ReportQueryFilter = {
   dateFrom: string
   dateTo: string
+  timePeriod?: '23:59:59' | '08:40:00' | null
 }
 
 export type CashFlowResponse = {

@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-import { TradernetRequestLimitError, isTradernetError } from './helper'
+import { TradernetRequestLimitError, isTradernetError, logger } from './helper'
 import { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig, UserCashFlowsParams } from './types/api'
 
 type RequestHeaders = {
@@ -23,6 +23,7 @@ export class HttpClient {
   private readonly baseUrl: string
   private readonly timeout: number
   private readonly retries: number
+  public readonly verbose: boolean
 
   constructor(config: TradernetConfig) {
     this.apiKey = config.apiKey
@@ -30,6 +31,7 @@ export class HttpClient {
     this.baseUrl = config.baseUrl || 'https://tradernet.com/api'
     this.timeout = config.timeout || 60000
     this.retries = config.retries || 3
+    this.verbose = config.verbose === true
   }
 
   public async makeRequest<T>(cmd: ApiCommand, params: RequestParams, attempt: number = 1): Promise<ApiResponse<T>> {
@@ -81,6 +83,9 @@ export class HttpClient {
     } catch (error) {
       if (attempt < this.retries && this.shouldRetry(error)) {
         const delayMs = Math.pow(2, attempt) * 3000
+        if (this.verbose) {
+          logger('retry', { cmd, attempt, delayMs })
+        }
         await this.delay(delayMs) // Exponential backoff
         return this.makeRequest<T>(cmd, params, attempt + 1)
       }
@@ -90,7 +95,6 @@ export class HttpClient {
         error: error instanceof Error ? error.message : 'Unknown Freedom API error',
         errorObject: error instanceof Error ? error : null,
       }
-    } finally {
     }
   }
 

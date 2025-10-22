@@ -6,7 +6,7 @@ export type {
   TradernetConfig,
   BrokerReportResponse,
   CashFlowResponse,
-  QueryDateRange,
+  ReportQueryFilter,
   ReportQueryType,
   ApiResponse,
 } from './types/api'

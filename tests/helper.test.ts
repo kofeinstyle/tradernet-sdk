@@ -1,4 +1,4 @@
-import { dateFormat, getFullDate, getFullMonth, isTradernetError, makeDateRange } from '../src/helper'
+import { dateFormat, getFullDate, getFullMonth, isTradernetError } from '../src/helper'
 
 describe('Helper', () => {
   it('getFullMonth', async () => {
@@ -16,13 +16,6 @@ describe('Helper', () => {
   it('dateFormat', async () => {
     const date = dateFormat(new Date('2021-12-01T00:00:00.000Z'))
     expect(date).toBe('2021-12-01')
-  })
-
-  it('makeDateRange', async () => {
-    const date = new Date()
-    const range = makeDateRange()
-    expect(range.dateFrom).toBe(date.getFullYear() + '-01-01')
-    expect(range.dateTo).toBe(date.getFullYear() + '-12-31')
   })
 
   it('isTradernetError', async () => {

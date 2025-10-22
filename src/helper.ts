@@ -1,5 +1,3 @@
-import type { QueryDateRange } from './types/api'
-
 export class TradernetRequestLimitError extends Error {
   constructor(message: string) {
     super(message)
@@ -19,13 +17,19 @@ export function getFullMonth(date: Date) {
   return ('0' + (date.getMonth() + 1)).slice(-2).toString()
 }
 
-export function makeDateRange(): QueryDateRange {
+export function makeDateRange(): { dateFrom: string; dateTo: string } {
   const date = new Date()
 
   return {
     dateFrom: dateFormat(new Date(`${date.getFullYear()}-01-01T00:00:00.000Z`)).toString(),
     dateTo: dateFormat(new Date(`${date.getFullYear()}-12-31T23:59:59.999Z`)).toString(),
   }
+}
+
+export function logger(event: string, payload: any) {
+  const dateTime = new Date().toISOString()
+  event = `[${dateTime}][tradernetSDK]: ${event}`
+  console.log({ event, payload })
 }
 
 export function useRealFetch() {

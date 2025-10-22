@@ -1,9 +1,10 @@
+import { logger } from './helper'
 import { HttpClient } from './http'
 import { normalizeCorporateActionsItem } from './mappers'
 import type {
   BrokerReportResponse,
   CashFlowResponse,
-  QueryDateRange,
+  ReportQueryFilter,
   ReportQueryParams,
   ReportQueryResult,
   ReportQueryType,
@@ -19,15 +20,20 @@ export class TradernetApiClient {
     this.httpClient = new HttpClient(config)
   }
 
+  async getBrokerReport<T extends ReportQueryType>(filter: ReportQueryFilter, type: T): Promise<BrokerReportResponse<T>>
+
   async getBrokerReport<T extends ReportQueryType>(
-    dateRange: QueryDateRange,
+    filter: ReportQueryFilter,
     type: T
   ): Promise<BrokerReportResponse<T>> {
     const payload: ReportQueryParams = {
-      date_start: dateRange.dateFrom,
-      date_end: dateRange.dateTo,
-      time_period: '23:59:59',
+      date_start: filter.dateFrom,
+      date_end: filter.dateTo,
+      time_period: 'timePeriod' in filter && filter.timePeriod ? filter.timePeriod : '08:40:00',
       type: type,
+    }
+    if (this.httpClient.verbose) {
+      logger('getBrokerReport', payload)
     }
     const result = await this.httpClient.makeRequest<ReportQueryResult<T>>('getBrokerReport', payload, 1)
 
