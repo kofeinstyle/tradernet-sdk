@@ -1,3 +1,6 @@
+
+![alt text](https://github.com/kofeinstyle/tradernet-sdk/blob/main/logo_tradernet.png?raw=true)
+
 # Tradernet SDK
 
 A comprehensive TypeScript/JavaScript client library for the Tradernet trading platform API.
@@ -5,11 +8,11 @@ A comprehensive TypeScript/JavaScript client library for the Tradernet trading p
 [![Publish Package to npmjs](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml/badge.svg)](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml)
 [![npm version](https://img.shields.io/npm/v/@kofeinstyle/tradernet-sdk.svg)](https://www.npmjs.com/package/@kofeinstyle/tradernet-sdk)
 
-### Docs - https://tradernet.ua/tradernet-api
+### Tradernet Docs - https://tradernet.com/tradernet-api/instruments
 
 ## Features
 
-- 💼 **Report Data** - Data array on trades for the requested report period
+- 💼 **Report Data** - Data array on trades/corporate actions/etc for the requested report period
 - 📝 **User Cash flow** - Obtaining data on the client's cash flow
 - 📊 **Market Data** - Real-time and historical market data (🔮 Coming Soon)
 - 💼 **Portfolio** - Portfolio and position tracking (🔮 Coming Soon)
@@ -37,17 +40,22 @@ const client = new TradernetApiClient({
 });
 ```
 
-* #### Get report data
+* #### Get a dividends report example
 ```javascript
-const result = await client.getBrokerReport({dateFrom: '2025-01-01', dateTo: '2025-21-31'});
-console.log('Report data:', result.data);
+const apiResult = await client.getBrokerReport({dateFrom: '2025-01-01', dateTo: '2025-21-31'}, 'corporate_actions');
+console.log('Report data:', apiResult.data);
+if (apiResult.success) {
+  const dividends = apiResult.data.report.detailed.filter((item) => item.type_id === CorporateActionTypes.DIVIDEND)
+  console.log('Dividends:', dividends);
+}
+
 ```
 
 * #### Get user cash flow data
 ```javascript
 const filter = [{ field: 'type_code', operator: 'eq', value: 'dividend'}]
 const result = await client.getUserCashFlows({take: 100, skip: 0, filter: filter});
-console.log('Cashflow data:', result.data.cashflow);
+console.log('Cashflow data:', result.data);
 ```
 
 [//]: # (## WebSocket Real-time Data &#40;to be implemented&#41;)
@@ -96,7 +104,7 @@ console.log('Cashflow data:', result.data.cashflow);
 ## API Methods
 
 ### Reports
-- `getBrokerReport(dateRange, attempt)` - Getting the broker's report by date range
+- `getBrokerReport(dateRange, type)` - Getting the broker's report by date range and type. (Like trades, corporate_actions, etc)
 - `getUserCashFlows(params)` - Getting the user's cash flow by filter. (Like tax, dividend, etc)
 
 ### Market Data (🚧 Planned for Future Versions)
@@ -127,7 +135,7 @@ console.log('Cashflow data:', result.data.cashflow);
 All API methods return an ApiResponse object with success/error information:
 
 ```javascript
-const result = await client.getBrokerTrades({dateFrom: '2021-01-01', dateTo: '2021-21-31'});
+const result = await client.getBrokerTrades({dateFrom: '2025-01-01', dateTo: '2025-21-31'}, 'trades');
 if (result.success) {
   console.log('Report data:', result.data);
 } else {
