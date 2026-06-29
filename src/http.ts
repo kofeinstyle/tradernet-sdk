@@ -17,6 +17,21 @@ type RequestPayload = {
   nonce: number
 }
 
+type ApiErrorResponse = {
+  error: string
+  errMsg?: string
+}
+
+class RetryableHttpStatusError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string
+  ) {
+    super(message || `HTTP ${status}`)
+    this.name = 'RetryableHttpStatusError'
+  }
+}
+
 export class HttpClient {
   private readonly apiKey: string
   private readonly apiSecret: string
@@ -28,9 +43,9 @@ export class HttpClient {
   constructor(config: TradernetConfig) {
     this.apiKey = config.apiKey
     this.apiSecret = config.apiSecret
-    this.baseUrl = config.baseUrl || 'https://tradernet.com/api'
-    this.timeout = config.timeout || 60000
-    this.retries = config.retries || 3
+    this.baseUrl = config.baseUrl ?? 'https://tradernet.com/api'
+    this.timeout = config.timeout ?? 60000
+    this.retries = config.retries ?? 3
     this.verbose = config.verbose === true
   }
 
@@ -56,32 +71,37 @@ export class HttpClient {
       })
 
       if (!response.ok) {
+        const message = await response.text()
+        if (this.isRetryableStatus(response.status)) {
+          throw new RetryableHttpStatusError(response.status, message)
+        }
+
         return {
           success: false,
           error: `HTTP ${response.status}`,
-          message: await response.text(),
+          message,
         }
       }
 
-      const responseData = await response.json()
+      const responseData: unknown = await response.json()
 
-      if (responseData.error) {
+      if (this.hasApiError(responseData)) {
         if (isTradernetError(responseData) && responseData.code === 429) {
           throw new TradernetRequestLimitError(responseData.errMsg)
         }
         return {
           success: false,
           error: 'Freedom API error',
-          message: responseData.error,
+          message: responseData.errMsg ?? responseData.error,
         }
       }
 
       return {
         success: true,
-        data: responseData,
+        data: responseData as T,
       }
     } catch (error) {
-      if (attempt < this.retries && this.shouldRetry(error)) {
+      if (attempt <= this.retries && this.shouldRetry(error)) {
         const delayMs = Math.pow(2, attempt) * 3000
         if (this.verbose) {
           logger('retry', { cmd, attempt, delayMs })
@@ -98,18 +118,20 @@ export class HttpClient {
     }
   }
 
-  private calcSign(params: Record<string, any>): string {
-    const preSignString = this.preSign(params)
+  private calcSign(params: RequestPayload): string {
+    const preSignString = this.preSign({ ...params })
     return crypto.createHmac('sha256', this.apiSecret).update(preSignString).digest('hex')
   }
 
-  private preSign(params: Record<string, any>): string {
+  private preSign(params: Record<string, unknown>): string {
     const keys = Object.keys(params).sort()
     const parts: string[] = []
 
     for (const key of keys) {
       const value = params[key]
-      if (typeof value === 'object' && value !== null) {
+      if (Array.isArray(value)) {
+        parts.push(`${key}=${this.preSign(Object.fromEntries(value.entries()))}`)
+      } else if (this.isRecord(value)) {
         parts.push(`${key}=${this.preSign(value)}`)
       } else {
         parts.push(`${key}=${value}`)
@@ -139,14 +161,36 @@ export class HttpClient {
     return formBody.join('&')
   }
 
-  private shouldRetry(error: any): boolean {
+  private shouldRetry(error: unknown): boolean {
     // Retry on network errors, timeouts, and 5xx, 429 status codes,
+    if (!(error instanceof Error)) {
+      return false
+    }
+
     return (
       error.name === 'AbortError' ||
+      error.name === 'TimeoutError' ||
       error.name === 'TypeError' ||
       error.name === 'RequestLimitError' ||
-      (error.status && error.status >= 500 && error.status < 600)
+      error instanceof RetryableHttpStatusError
     )
+  }
+
+  private isRetryableStatus(status: number): boolean {
+    return status === 429 || (status >= 500 && status < 600)
+  }
+
+  private hasApiError(response: unknown): response is ApiErrorResponse {
+    return (
+      typeof response === 'object' &&
+      response !== null &&
+      'error' in response &&
+      typeof response.error === 'string'
+    )
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
   }
 
   private delay(ms: number): Promise<void> {

@@ -61,19 +61,36 @@ export class TradernetApiClient {
     const payload: UserCashFlowsParams = params ? { ...params } : { take: null }
     const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload, 1)
 
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+        errorObject: result.errorObject,
+        message: result.message,
+      }
+    }
+
+    if (!result.data) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'Missing cash flow data',
+      }
+    }
+
     return {
-      success: result.success,
-      error: result.error,
-      message: result.message,
+      success: true,
       data: {
-        limits: result.data?.limits,
-        cash_totals: result.data?.cash_totals,
-        total: Number(result.data?.total || 0),
-        cashflow: result.data?.cashflow.map(item => {
-          item.sumRaw = Number(item.sumRaw)
-          item.sum = Number(item.sum)
-          return item
-        })!,
+        limits: result.data.limits,
+        cash_totals: result.data.cash_totals,
+        total: Number(result.data.total || 0),
+        cashflow: Array.isArray(result.data.cashflow)
+          ? result.data.cashflow.map(item => ({
+              ...item,
+              sumRaw: Number(item.sumRaw),
+              sum: Number(item.sum),
+            }))
+          : [],
       },
     }
   }

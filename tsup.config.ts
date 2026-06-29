@@ -4,7 +4,6 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
   dts: { resolve: true, entry: 'src/index.ts' },
-  noExternal: ['your-problematic-package'],
   skipNodeModulesBundle: true,
   sourcemap: true,
   minify: false,

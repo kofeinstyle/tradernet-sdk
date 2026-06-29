@@ -1,7 +1,12 @@
 import type { CorporateActionsItem } from './types/common'
 
-export const normalizeCorporateActionsItem = (item: object) => {
-  let result = { ...item }
+type CorporateActionsInput = Omit<Partial<CorporateActionsItem>, 'tax_amount' | 'tax_currency'> & {
+  tax_amount?: unknown
+  tax_currency?: unknown
+}
+
+export const normalizeCorporateActionsItem = (item: CorporateActionsInput): CorporateActionsItem => {
+  const result = { ...item }
 
   if (
     'tax_currency' in result &&
@@ -9,7 +14,11 @@ export const normalizeCorporateActionsItem = (item: object) => {
     'currency' in result &&
     (result.tax_currency === '' || typeof result.tax_amount !== 'number')
   ) {
-    result = Object.assign(result, { tax_amount: 0, tax_currency: result.currency })
+    return {
+      ...result,
+      tax_amount: 0,
+      tax_currency: result.currency,
+    } as CorporateActionsItem
   }
 
   return result as CorporateActionsItem

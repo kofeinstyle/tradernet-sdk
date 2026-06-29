@@ -26,7 +26,7 @@ export function makeDateRange(): { dateFrom: string; dateTo: string } {
   }
 }
 
-export function logger(event: string, payload: any) {
+export function logger(event: string, payload: unknown) {
   const dateTime = new Date().toISOString()
   event = `[${dateTime}][tradernetSDK]: ${event}`
   console.log({ event, payload })

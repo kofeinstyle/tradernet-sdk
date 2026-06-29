@@ -3,7 +3,7 @@
 
 # Tradernet SDK
 
-A comprehensive TypeScript/JavaScript client library for the Tradernet trading platform API.
+A TypeScript/JavaScript client library for the Tradernet trading platform API.
 
 [![Publish Package to npmjs](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml/badge.svg)](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml)
 [![npm version](https://img.shields.io/npm/v/@kofeinstyle/tradernet-sdk.svg)](https://www.npmjs.com/package/@kofeinstyle/tradernet-sdk)
@@ -12,15 +12,12 @@ A comprehensive TypeScript/JavaScript client library for the Tradernet trading p
 
 ## Features
 
-- 💼 **Report Data** - Data array on trades/corporate actions/etc for the requested report period
-- 📝 **User Cash flow** - Obtaining data on the client's cash flow
-- 📊 **Market Data** - Real-time and historical market data (🔮 Coming Soon)
-- 💼 **Portfolio** - Portfolio and position tracking (🔮 Coming Soon)
-- 🔌 **WebSocket** - Real-time data streaming with auto-reconnection (🔮 Coming Soon)
-- 📝 **TypeScript** - Full TypeScript support with comprehensive types
-- 🧪 **Tested** - Comprehensive test suite with Jest
-- 🔄 **Retry Logic** - Automatic retry with exponential backoff
-- 📦 **Lightweight** - Zero external dependencies
+- 💼 **Broker Reports** - Trades, corporate actions, cash flows, commissions, and related report data
+- 📝 **User Cash Flows** - Cash flow data with filters and pagination
+- 📝 **TypeScript** - Typed public methods and response shapes for supported endpoints
+- 🧪 **Tested** - Jest coverage for current client behavior
+- 🔄 **Retry Logic** - Retry support for network errors, timeouts, HTTP 429, and HTTP 5xx responses
+- 📦 **Lightweight** - No runtime dependencies
 
 ## Installation
 
@@ -31,143 +28,77 @@ npm install @kofeinstyle/tradernet-sdk
 ## Quick Start
 
 ```javascript
-import { TradernetApiClient } from '@kofeinstyle/tradernet-sdk';
+import { TradernetApiClient } from '@kofeinstyle/tradernet-sdk'
 
 // Initialize client
 const client = new TradernetApiClient({
   apiKey: 'testApiKey',
   apiSecret: 'testApiSecret',
-});
+})
 ```
 
-* #### Get a dividends report example
+#### Get a dividends report
+
 ```javascript
-const apiResult = await client.getBrokerReport({dateFrom: '2025-01-01', dateTo: '2025-21-31'}, 'corporate_actions');
-console.log('Report data:', apiResult.data);
+import { CorporateActionTypes } from '@kofeinstyle/tradernet-sdk'
+
+const apiResult = await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-12-31' }, 'corporate_actions')
+
 if (apiResult.success) {
-  const dividends = apiResult.data.report.detailed.filter((item) => item.type_id === CorporateActionTypes.DIVIDEND)
-  console.log('Dividends:', dividends);
+  const dividends = apiResult.data.report.detailed.filter(item => item.type_id === CorporateActionTypes.DIVIDEND)
+  console.log('Dividends:', dividends)
+} else {
+  console.error('Error:', apiResult.error, apiResult.message)
 }
-
 ```
 
-* #### Get user cash flow data
+#### Get user cash flow data
+
 ```javascript
-const filter = [{ field: 'type_code', operator: 'eq', value: 'dividend'}]
-const result = await client.getUserCashFlows({take: 100, skip: 0, filter: filter});
-console.log('Cashflow data:', result.data);
+const filters = [{ field: 'type_code', operator: 'eq', value: 'dividend' }]
+const result = await client.getUserCashFlows({ take: 100, skip: 0, filters })
+
+if (result.success) {
+  console.log('Cashflow data:', result.data.cashflow)
+} else {
+  console.error('Error:', result.error, result.message)
+}
 ```
-
-[//]: # (## WebSocket Real-time Data &#40;to be implemented&#41;)
-
-[//]: # ()
-[//]: # (```javascript)
-
-[//]: # (// Connect to WebSocket)
-
-[//]: # (await client.connectWebSocket&#40;&#41;;)
-
-[//]: # ()
-[//]: # (// Subscribe to real-time data)
-
-[//]: # (client.subscribeToTickers&#40;['AAPL', 'GOOGL', 'MSFT']&#41;;)
-
-[//]: # (client.subscribeToOrders&#40;&#41;;)
-
-[//]: # (client.subscribeToPortfolio&#40;&#41;;)
-
-[//]: # ()
-[//]: # (// Listen for events)
-
-[//]: # (client.on&#40;'ticker', &#40;ticker&#41; => {)
-
-[//]: # (  console.log&#40;`${ticker.symbol}: $${ticker.price}`&#41;;)
-
-[//]: # (}&#41;;)
-
-[//]: # ()
-[//]: # (client.on&#40;'order', &#40;order&#41; => {)
-
-[//]: # (  console.log&#40;`Order ${order.id} status: ${order.status}`&#41;;)
-
-[//]: # (}&#41;;)
-
-[//]: # ()
-[//]: # (client.on&#40;'portfolio', &#40;portfolio&#41; => {)
-
-[//]: # (  console.log&#40;`Portfolio value: $${portfolio.totalValue}`&#41;;)
-
-[//]: # (}&#41;;)
-
-[//]: # (```)
 
 ## API Methods
 
 ### Reports
-- `getBrokerReport(dateRange, type)` - Getting the broker's report by date range and type. (Like trades, corporate_actions, etc)
-- `getUserCashFlows(params)` - Getting the user's cash flow by filter. (Like tax, dividend, etc)
 
-### Market Data (🚧 Planned for Future Versions)
-- `getTicker(symbol)` - Get ticker data for a symbol
-- `getTickers(symbols)` - Get ticker data for multiple symbols
-- `getQuote(symbol)` - Get bid/ask quote data
-- `getCandles(symbol, interval, limit)` - Get historical candle data
-
-### Portfolio (🚧 Planned for Future Versions)
-- `getPortfolio()` - Get portfolio summary
-- `getPositions()` - Get all positions
-- `getPosition(symbol)` - Get position for a symbol
-- `getAccountInfo()` - Get account information
-- `getBalance()` - Get account balance
-
-### WebSocket (🚧 Planned for Future Versions)
-- `connectWebSocket()` - Connect to real-time data stream
-- `disconnectWebSocket()` - Disconnect from WebSocket
-- `subscribeToTickers(symbols)` - Subscribe to ticker updates
-- `subscribeToQuotes(symbols)` - Subscribe to quote updates
-- `subscribeToOrders()` - Subscribe to order updates
-- `subscribeToPortfolio()` - Subscribe to portfolio updates
-- `unsubscribe(channels, symbols)` - Unsubscribe from channels
-
+- `getBrokerReport(dateRange, type)` - Gets a broker report by date range and report type, such as `trades` or `corporate_actions`.
+- `getUserCashFlows(params)` - Gets user cash flow records with optional pagination, sorting, and filters.
 
 ## Error Handling
 
 All API methods return an ApiResponse object with success/error information:
 
 ```javascript
-const result = await client.getBrokerTrades({dateFrom: '2025-01-01', dateTo: '2025-21-31'}, 'trades');
+const result = await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-12-31' }, 'trades')
+
 if (result.success) {
-  console.log('Report data:', result.data);
+  console.log('Report data:', result.data)
 } else {
-  console.error('Error:', result.error);
+  console.error('Error:', result.error, result.message)
 }
 ```
 
 ## Configuration
 
 ### TradernetConfig
+- `apiKey` - Tradernet public API key.
+- `apiSecret` - Tradernet API secret used to sign requests.
 - `baseUrl` - API base URL (default: 'https://tradernet.com/api')
-- `timeout` - Request timeout in milliseconds (default: 30000)
+- `timeout` - Request timeout in milliseconds (default: 60000)
 - `retries` - Number of retry attempts (default: 3)
+- `verbose` - Enables SDK debug logs when set to `true`
 
+## Roadmap
 
-## Events (🚧 Planned for Future Versions)
-
-The client emits the following events:
-- `ticker` - Real-time ticker updates
-- `quote` - Real-time quote updates
-- `order` - Order status updates
-- `portfolio` - Portfolio updates
-- `ws_connected` - WebSocket connected
-- `ws_disconnected` - WebSocket disconnected
-- `ws_authenticated` - WebSocket authenticated
-- `error` - Error events
-
-## WebSocketConfig (🚧 Planned for Future Versions)
-- `url` - WebSocket URL (default: 'wss://ws.tradernet.com')
-- `reconnectInterval` - Reconnection interval in ms (default: 5000)
-- `maxReconnectAttempts` - Max reconnection attempts (default: 10)
-- `pingInterval` - Ping interval in ms (default: 30000)
+Market data, portfolio, and WebSocket APIs are planned for future versions. They are not part of the current public API.
 
 ## Development
 

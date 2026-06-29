@@ -1,28 +1,22 @@
-name: Publish Package to npmjs
+name: CI
 
 on:
   push:
-    tags:
-      - 'v*'
-      - '0.*'
+    branches:
+      - main
+  pull_request:
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
 
     steps:
       - uses: actions/checkout@v5
-      # Setup .npmrc file to publish to npm
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@kofeinstyle'
           cache: 'npm'
 
       - name: Install dependencies
@@ -31,19 +25,14 @@ jobs:
       - name: Type check
         run: npm run check
 
-      - name: Build
-        run: npm run build
-
       - name: Test
         run: npm test
+
+      - name: Build
+        run: npm run build
 
       - name: Verify package imports
         run: npm run verify:import
 
       - name: Verify npm package contents
         run: npm pack --dry-run
-
-      - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
