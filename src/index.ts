@@ -7,7 +7,17 @@ export type {
   BrokerReportResponse,
   CashFlowResponse,
   ReportQueryFilter,
+  ReportQueryResult,
   ReportQueryType,
+  ReportResponse,
+  ReportResponseShort,
+  ReportTotal,
+  ReportProjectedTotal,
+  CashTotal,
+  AccountAtEndItem,
+  CommissionItem,
+  CashFlowReportItem,
+  SecuritiesFlowItem,
   ApiResponse,
 } from './types/api'
 

@@ -1,7 +1,6 @@
 import type {
   CashFlowItem,
   CorporateActionsItem,
-  FiatCurrency,
   FilterOperator,
   TradeItem,
   TransactionTypeCode,
@@ -66,36 +65,46 @@ export type ReportQueryFilter = {
   timePeriod?: '23:59:59' | '08:40:00' | null
 }
 
+export type UnknownRecord = Record<string, unknown>
+export type CashTotal = UnknownRecord
+export type ReportProjectedTotal = UnknownRecord
+export type ReportTotal = Record<string, number>
+export type UntypedReportItem = UnknownRecord
+export type AccountAtEndItem = UntypedReportItem
+export type CommissionItem = UntypedReportItem
+export type CashFlowReportItem = UntypedReportItem
+export type SecuritiesFlowItem = UntypedReportItem
+
 export type CashFlowResponse = {
   total: number
   cashflow: CashFlowItem[]
-  cash_totals?: any[]
+  cash_totals?: CashTotal[]
   limits?: Record<string, { minimum: number; maximum: number; multiplicity: number; blockchain?: number }>
 }
 
 export type ReportResponse<T> = {
   report: {
     detailed: T[]
-    total: Record<FiatCurrency, number>
+    total: ReportTotal
     securities?: Record<string, number>
-    prtotal?: any[]
+    prtotal?: ReportProjectedTotal[]
   }
 }
 
 export type ReportResponseShort<T> = {
   report: {
     detailed: T[]
-    total: Record<FiatCurrency, number>
+    total: ReportTotal
   }
 }
 
 type ReportQueryResultMap = {
   trades: ReportResponse<TradeItem>
   corporate_actions: ReportResponseShort<CorporateActionsItem>
-  account_at_end: any
-  commissions: any
-  cash_flows: any
-  securities_flows: any
+  account_at_end: ReportResponse<AccountAtEndItem>
+  commissions: ReportResponse<CommissionItem>
+  cash_flows: ReportResponse<CashFlowReportItem>
+  securities_flows: ReportResponse<SecuritiesFlowItem>
 }
 
 export type ReportQueryResult<T extends ReportQueryType> = ReportQueryResultMap[T]

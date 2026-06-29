@@ -6,6 +6,5 @@
   "tsc-alias" : {
     "resolveFullPaths": true
   },
-  "include": ["src"],
-  "exclude": ["./src/websocket.ts", "./src/websocketClient.ts"]
+  "include": ["src"]
 }
