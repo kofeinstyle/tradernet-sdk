@@ -1,6 +1,7 @@
 import { logger } from './helper'
 import { HttpClient } from './http'
 import { normalizeCorporateActionsItem } from './mappers'
+import type { CashFlowItem } from './types/common'
 import type {
   BrokerReportResponse,
   CashFlowResponse,
@@ -12,6 +13,12 @@ import type {
   UserCashFlowResponse,
   UserCashFlowsParams,
 } from './types/api'
+
+type ReportWithDetailed = {
+  report: {
+    detailed: Record<string, unknown>[]
+  }
+}
 
 export class TradernetApiClient {
   private httpClient: HttpClient
@@ -37,22 +44,39 @@ export class TradernetApiClient {
     }
     const result = await this.httpClient.makeRequest<ReportQueryResult<T>>('getBrokerReport', payload, 1)
 
-    if (
-      result.success &&
-      type === 'corporate_actions' &&
-      result.data &&
-      'report' in result.data &&
-      'detailed' in result.data.report
-    ) {
-      result.data.report.detailed = result.data.report.detailed.map((item: object) =>
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+        errorObject: result.errorObject,
+        message: result.message,
+      }
+    }
+
+    if (!this.hasDetailedReport(result.data)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: `Missing report.detailed data for ${type} report`,
+      }
+    }
+
+    if (!this.hasObjectItems(result.data.report.detailed)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: `report.detailed must contain objects for ${type} report`,
+      }
+    }
+
+    if (type === 'corporate_actions') {
+      result.data.report.detailed = result.data.report.detailed.map(item =>
         normalizeCorporateActionsItem(item)
       )
     }
 
     return {
-      success: result.success,
-      error: result.error,
-      message: result.message,
+      success: true,
       data: result.data,
     }
   }
@@ -74,9 +98,19 @@ export class TradernetApiClient {
       return {
         success: false,
         error: 'Invalid API response',
-        message: 'Missing cash flow data',
+        message: 'Missing cash flow data for getUserCashFlows',
       }
     }
+
+    if ('cashflow' in result.data && !Array.isArray(result.data.cashflow)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'cashflow must be an array for getUserCashFlows',
+      }
+    }
+
+    const cashflow: CashFlowItem[] = Array.isArray(result.data.cashflow) ? result.data.cashflow : []
 
     return {
       success: true,
@@ -84,100 +118,28 @@ export class TradernetApiClient {
         limits: result.data.limits,
         cash_totals: result.data.cash_totals,
         total: Number(result.data.total || 0),
-        cashflow: Array.isArray(result.data.cashflow)
-          ? result.data.cashflow.map(item => ({
-              ...item,
-              sumRaw: Number(item.sumRaw),
-              sum: Number(item.sum),
-            }))
-          : [],
+        cashflow: cashflow.map(item => ({
+          ...item,
+          sumRaw: Number(item.sumRaw),
+          sum: Number(item.sum),
+        })),
       },
     }
   }
 
-  // Market data methods
-  // async getTicker(symbol: string): Promise<ApiResponse<Ticker>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Ticker>(`/market/ticker/${symbol}`)
-  // }
-  //
-  // async getTickers(symbols?: string[]): Promise<ApiResponse<Ticker[]>> {
-  //   this.ensureAuthenticated()
-  //   const endpoint = symbols ? `/market/tickers?symbols=${symbols.join(',')}` : '/market/tickers'
-  //   return this.httpClient.get<Ticker[]>(endpoint)
-  // }
-  //
-  // async getQuote(symbol: string): Promise<ApiResponse<Quote>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Quote>(`/market/quote/${symbol}`)
-  // }
-  //
-  // async getCandles(symbol: string, interval: string = '1m', limit: number = 100): Promise<ApiResponse<Candle[]>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Candle[]>(`/market/candles/${symbol}?interval=${interval}&limit=${limit}`)
-  // }
-  //
-  // // Order management methods
-  // async createOrder(orderRequest: CreateOrderRequest): Promise<ApiResponse<Order>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.post<Order>('/orders', orderRequest)
-  // }
-  //
-  // async getOrder(orderId: string): Promise<ApiResponse<Order>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Order>(`/orders/${orderId}`)
-  // }
-  //
-  // async getOrders(symbol?: string, status?: string): Promise<ApiResponse<Order[]>> {
-  //   this.ensureAuthenticated()
-  //   let endpoint = '/orders'
-  //   const params = []
-  //
-  //   if (symbol) params.push(`symbol=${symbol}`)
-  //   if (status) params.push(`status=${status}`)
-  //
-  //   if (params.length > 0) {
-  //     endpoint += `?${params.join('&')}`
-  //   }
-  //
-  //   return this.httpClient.get<Order[]>(endpoint)
-  // }
-  //
-  // async cancelOrder(orderId: string): Promise<ApiResponse<Order>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.delete<Order>(`/orders/${orderId}`)
-  // }
-  //
-  // async cancelAllOrders(symbol?: string): Promise<ApiResponse<Order[]>> {
-  //   this.ensureAuthenticated()
-  //   const endpoint = symbol ? `/orders/cancel-all?symbol=${symbol}` : '/orders/cancel-all'
-  //   return this.httpClient.post<Order[]>(endpoint)
-  // }
-  //
-  // // Portfolio methods
-  // async getPortfolio(): Promise<ApiResponse<Portfolio>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Portfolio>('/portfolio')
-  // }
-  //
-  // async getPositions(): Promise<ApiResponse<Position[]>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Position[]>('/portfolio/positions')
-  // }
-  //
-  // async getPosition(symbol: string): Promise<ApiResponse<Position>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get<Position>(`/portfolio/positions/${symbol}`)
-  // }
-  //
-  // // Account methods
-  // async getAccountInfo(): Promise<ApiResponse<any>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get('/account')
-  // }
-  //
-  // async getBalance(): Promise<ApiResponse<any>> {
-  //   this.ensureAuthenticated()
-  //   return this.httpClient.get('/account/balance')
-  // }
+  private hasDetailedReport<T extends ReportQueryType>(data: ReportQueryResult<T> | null | undefined): data is ReportQueryResult<T> & ReportWithDetailed {
+    return (
+      typeof data === 'object' &&
+      data !== null &&
+      'report' in data &&
+      typeof data.report === 'object' &&
+      data.report !== null &&
+      'detailed' in data.report &&
+      Array.isArray(data.report.detailed)
+    )
+  }
+
+  private hasObjectItems(items: unknown[]): items is Record<string, unknown>[] {
+    return items.every(item => typeof item === 'object' && item !== null && !Array.isArray(item))
+  }
 }

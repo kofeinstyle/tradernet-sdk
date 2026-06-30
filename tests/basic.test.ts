@@ -74,6 +74,49 @@ describe('TradernetApiClient', () => {
       expect(result.data).toHaveProperty('report.detailed')
       expect(result.data).toHaveProperty('report.prtotal')
     })
+
+    it('should return an invalid response error when report.detailed is missing', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            success: true,
+            report: {
+              total: { USD: 100 },
+            },
+          }),
+        })
+      }
+
+      const result = await client.getBrokerReport(makeDateRange(), 'trades')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Invalid API response')
+      expect(result.message).toBe('Missing report.detailed data for trades report')
+      expect(result.data).toBeUndefined()
+    })
+
+    it('should return an invalid response error when report.detailed contains non-object items', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            success: true,
+            report: {
+              detailed: [null],
+              total: { USD: 100 },
+            },
+          }),
+        })
+      }
+
+      const result = await client.getBrokerReport(makeDateRange(), 'corporate_actions')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Invalid API response')
+      expect(result.message).toBe('report.detailed must contain objects for corporate_actions report')
+      expect(result.data).toBeUndefined()
+    })
   })
 
   describe('Get Depositary corporate_actions report', () => {
@@ -250,6 +293,26 @@ describe('TradernetApiClient', () => {
 
       expect(result.success).toBe(true)
       expect(result.data?.cashflow).toEqual([])
+    })
+
+    it('should return an invalid response error when cashflow is not an array', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            success: true,
+            total: 0,
+            cashflow: {},
+          }),
+        })
+      }
+
+      const result = await client.getUserCashFlows()
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Invalid API response')
+      expect(result.message).toBe('cashflow must be an array for getUserCashFlows')
+      expect(result.data).toBeUndefined()
     })
   })
 
