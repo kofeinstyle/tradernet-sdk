@@ -14,5 +14,6 @@
 - Normalize cash flow numeric fields without mutating raw response items.
 - Publish only built `dist` artifacts in the npm package.
 - Add CI, import verification, and trusted publishing release workflow.
+- dsadasd
 
 
