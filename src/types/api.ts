@@ -1,10 +1,4 @@
-import type {
-  CashFlowItem,
-  CorporateActionsItem,
-  FilterOperator,
-  TradeItem,
-  TransactionTypeCode,
-} from './common'
+import type { CashFlowItem, CorporateActionsItem, FilterOperator, TradeItem } from './common'
 
 export type ApiCommand = 'getBrokerReport' | 'getUserCashFlows'
 
@@ -17,14 +11,23 @@ export interface TradernetConfig {
   verbose?: boolean
 }
 
-// API Response types
-export interface ApiResponse<T = any> {
-  success: boolean
-  data?: T | null
-  error?: string
+export type ApiSuccessResponse<T> = {
+  success: true
+  data: T
+  error?: never
+  errorObject?: never
+  message?: never
+}
+
+export type ApiErrorResponse = {
+  success: false
+  data?: never
+  error: string
   errorObject?: Error | null
   message?: string
 }
+
+export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 
 export type ReportQueryType =
   | 'corporate_actions'
@@ -34,18 +37,31 @@ export type ReportQueryType =
   | 'cash_flows'
   | 'securities_flows'
 
+export type ReportTimePeriod = '23:59:59' | '08:40:00'
+
 export type ReportQueryParams = {
   date_end: string
   date_start: string
-  time_period: string | null
+  time_period: ReportTimePeriod
   type: ReportQueryType
 }
 
-export type UserCashFlowsParamsFilter = {
-  field: 'type_code' | 'date' | 'currency'
-  operator: FilterOperator
-  value: TransactionTypeCode | string
+export type UserCashFlowsField = 'date' | 'sum' | 'currency' | 'comment' | 'type_code'
+
+export type SortDirection = 'ASC' | 'DESC'
+
+export type SortDescriptor<TField extends string = string> = {
+  field: TField
+  dir: SortDirection
 }
+
+export type UserCashFlowsParamsFilter = {
+  field: UserCashFlowsField
+  operator: FilterOperator
+  value: string
+}
+
+export type UserCashFlowsParamsSort = SortDescriptor<UserCashFlowsField>
 
 export type UserCashFlowsParams = {
   user_id?: number | null
@@ -56,13 +72,13 @@ export type UserCashFlowsParams = {
   groupByType?: number | null
   skip?: number | null
   filters?: UserCashFlowsParamsFilter[] | null
-  sort?: [] | null
+  sort?: UserCashFlowsParamsSort[] | null
 }
 
 export type ReportQueryFilter = {
   dateFrom: string
   dateTo: string
-  timePeriod?: '23:59:59' | '08:40:00' | null
+  timePeriod?: ReportTimePeriod
 }
 
 export type UnknownRecord = Record<string, unknown>
@@ -94,7 +110,7 @@ export type ReportResponse<T> = {
 export type ReportResponseShort<T> = {
   report: {
     detailed: T[]
-    total: ReportTotal
+    total?: ReportTotal
   }
 }
 

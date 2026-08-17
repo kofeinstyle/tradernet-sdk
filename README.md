@@ -1,144 +1,130 @@
-
-![alt text](https://github.com/kofeinstyle/tradernet-sdk/blob/main/logo_tradernet.png?raw=true)
+![Tradernet logo](https://github.com/kofeinstyle/tradernet-sdk/blob/main/logo_tradernet.png?raw=true)
 
 # Tradernet SDK
 
-A TypeScript/JavaScript client library for the Tradernet trading platform API.
+A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 
 [![Publish Package to npmjs](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml/badge.svg)](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml)
 [![npm version](https://img.shields.io/npm/v/@kofeinstyle/tradernet-sdk.svg)](https://www.npmjs.com/package/@kofeinstyle/tradernet-sdk)
 
-### Tradernet Docs - https://tradernet.com/tradernet-api/instruments
+[Tradernet API documentation](https://tradernet.com/tradernet-api/)
 
 ## Features
 
-- 💼 **Broker Reports** - Trades, corporate actions, cash flows, commissions, and related report data
-- 📝 **User Cash Flows** - Cash flow data with filters and pagination
-- 📝 **TypeScript** - Typed public methods and response shapes for supported endpoints
-- 🧪 **Tested** - Jest coverage for current client behavior
-- 🔄 **Retry Logic** - Retry support for network errors, timeouts, HTTP 429, and HTTP 5xx responses
-- 📦 **Lightweight** - No runtime dependencies
+- Typed broker reports and user cash flow requests.
+- ESM and CommonJS builds with generated TypeScript declarations.
+- Retries for network errors, timeouts, HTTP 429, and HTTP 5xx responses.
+- Runtime validation at supported API boundaries.
+- No runtime dependencies.
 
 ## Installation
 
 ```bash
 npm install @kofeinstyle/tradernet-sdk
+
+# Bun
+bun add @kofeinstyle/tradernet-sdk
 ```
 
 ## Quick Start
 
-```javascript
+```ts
 import { TradernetApiClient } from '@kofeinstyle/tradernet-sdk'
 
-// Initialize client
 const client = new TradernetApiClient({
-  apiKey: 'testApiKey',
-  apiSecret: 'testApiSecret',
+  apiKey: process.env.TRADERNET_API_KEY!,
+  apiSecret: process.env.TRADERNET_API_SECRET!,
 })
 ```
 
-#### Get a dividends report
+## Broker Reports
 
-```javascript
-import { CorporateActionTypes } from '@kofeinstyle/tradernet-sdk'
+`getBrokerReport()` returns the selected report block. The default report cut-off is `23:59:59`; pass `08:40:00` explicitly when an opening-of-day cut is required.
 
-const apiResult = await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-12-31' }, 'corporate_actions')
-
-if (apiResult.success) {
-  const dividends = apiResult.data.report.detailed.filter(item => item.type_id === CorporateActionTypes.DIVIDEND)
-  console.log('Dividends:', dividends)
-} else {
-  console.error('Error:', apiResult.error, apiResult.message)
-}
-```
-
-#### Get user cash flow data
-
-```javascript
-const filters = [{ field: 'type_code', operator: 'eq', value: 'dividend' }]
-const result = await client.getUserCashFlows({ take: 100, skip: 0, filters })
-
-if (result.success) {
-  console.log('Cashflow data:', result.data.cashflow)
-} else {
-  console.error('Error:', result.error, result.message)
-}
-```
-
-## API Methods
-
-### Reports
-
-- `getBrokerReport(dateRange, type)` - Gets a broker report by date range and report type, such as `trades` or `corporate_actions`.
-- `getUserCashFlows(params)` - Gets user cash flow records with optional pagination, sorting, and filters.
-
-## Error Handling
-
-All API methods return an ApiResponse object with success/error information:
-
-```javascript
+```ts
 const result = await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-12-31' }, 'trades')
 
 if (result.success) {
-  console.log('Report data:', result.data)
+  console.log(result.data.report.detailed)
 } else {
-  console.error('Error:', result.error, result.message)
+  console.error(result.error, result.message)
 }
+```
+
+### Dividends from corporate actions
+
+Corporate actions contain broker-report dividend records, including tax and ex-date fields.
+
+```ts
+import { CorporateActionTypes } from '@kofeinstyle/tradernet-sdk'
+
+const result = await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-12-31' }, 'corporate_actions')
+
+if (result.success) {
+  const dividends = result.data.report.detailed.filter(item => item.type_id === CorporateActionTypes.DIVIDEND)
+  console.log(dividends)
+}
+```
+
+## User Cash Flows
+
+Cash flow dividend entries are account ledger operations. They are not the same records as corporate actions and have a different shape.
+
+```ts
+const result = await client.getUserCashFlows({
+  take: 100,
+  skip: 0,
+  filters: [{ field: 'type_code', operator: 'eq', value: 'dividend' }],
+  sort: [{ field: 'date', dir: 'DESC' }],
+})
+
+if (result.success) {
+  console.log(result.data.cashflow)
+} else {
+  console.error(result.error, result.message)
+}
+```
+
+Filtering and sorting support `date`, `sum`, `currency`, `comment`, and `type_code`. Sort directions are `ASC` and `DESC`.
+
+## Error Handling
+
+Methods return a discriminated `ApiResponse<T>` and do not throw for HTTP or Tradernet API errors. Checking `success` narrows the result to either data or error fields.
+
+```ts
+const result = await client.getUserCashFlows()
+
+if (!result.success) {
+  console.error(result.error, result.message, result.errorObject)
+  return
+}
+
+console.log(result.data.cashflow)
 ```
 
 ## Configuration
 
-### TradernetConfig
-- `apiKey` - Tradernet public API key.
-- `apiSecret` - Tradernet API secret used to sign requests.
-- `baseUrl` - API base URL (default: 'https://tradernet.com/api')
-- `timeout` - Request timeout in milliseconds (default: 60000)
-- `retries` - Number of retry attempts (default: 3)
-- `verbose` - Enables SDK debug logs when set to `true`
+`TradernetConfig` supports:
 
-## Roadmap
+- `apiKey` and `apiSecret` - required API credentials.
+- `baseUrl` - API base URL; defaults to `https://tradernet.com/api`.
+- `timeout` - request timeout in milliseconds; defaults to `60000`.
+- `retries` - retry count; defaults to `3`. Set `0` to disable retries.
+- `verbose` - logs request and retry details when `true`.
 
-Market data, portfolio, and WebSocket APIs are planned for future versions. They are not part of the current public API.
+The current HTTP transport targets Tradernet API v2. API v3 and WebSocket support are not part of the public package API yet.
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Run tests
-npm test
-
-# Run tests in watch mode
+npm run verify
 npm run test:watch
-
-# Run tests with coverage
 npm run test:coverage
-
-# Build TypeScript
-npm run build
-
-# Build in watch mode
-npm run build:watch
-
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+See [AGENTS.md](AGENTS.md) for repository and release conventions.
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Support
-
-For support, please open an issue on GitHub or contact the maintainers.
-
----
-
-**Note:** This SDK is designed to work with the Tradernet trading platform. Make sure you have valid API credentials and understand the risks involved in automated trading.
+MIT. Do not commit API credentials or use production credentials in unit tests.

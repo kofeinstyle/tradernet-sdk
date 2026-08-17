@@ -1,7 +1,6 @@
 import { logger } from './helper'
 import { HttpClient } from './http'
 import { normalizeCorporateActionsItem } from './mappers'
-import type { CashFlowItem } from './types/common'
 import type {
   BrokerReportResponse,
   CashFlowResponse,
@@ -13,6 +12,7 @@ import type {
   UserCashFlowResponse,
   UserCashFlowsParams,
 } from './types/api'
+import type { CashFlowItem } from './types/common'
 
 type ReportWithDetailed = {
   report: {
@@ -36,7 +36,7 @@ export class TradernetApiClient {
     const payload: ReportQueryParams = {
       date_start: filter.dateFrom,
       date_end: filter.dateTo,
-      time_period: 'timePeriod' in filter && filter.timePeriod ? filter.timePeriod : '08:40:00',
+      time_period: filter.timePeriod ?? '23:59:59',
       type: type,
     }
     if (this.httpClient.verbose) {
@@ -70,9 +70,19 @@ export class TradernetApiClient {
     }
 
     if (type === 'corporate_actions') {
-      result.data.report.detailed = result.data.report.detailed.map(item =>
-        normalizeCorporateActionsItem(item)
-      )
+      const normalizedItems = []
+      for (const [index, item] of result.data.report.detailed.entries()) {
+        const normalizedItem = normalizeCorporateActionsItem(item)
+        if (!normalizedItem) {
+          return {
+            success: false,
+            error: 'Invalid API response',
+            message: `Invalid corporate_actions item at index ${index}`,
+          }
+        }
+        normalizedItems.push(normalizedItem)
+      }
+      result.data.report.detailed = normalizedItems
     }
 
     return {
@@ -127,7 +137,9 @@ export class TradernetApiClient {
     }
   }
 
-  private hasDetailedReport<T extends ReportQueryType>(data: ReportQueryResult<T> | null | undefined): data is ReportQueryResult<T> & ReportWithDetailed {
+  private hasDetailedReport<T extends ReportQueryType>(
+    data: ReportQueryResult<T> | null | undefined
+  ): data is ReportQueryResult<T> & ReportWithDetailed {
     return (
       typeof data === 'object' &&
       data !== null &&

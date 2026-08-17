@@ -11,11 +11,20 @@ WebSocket support is planned, but the public API is not designed yet. Do not bas
 
 ## Design Questions
 
-- Authentication: confirm whether the socket uses API key/signature, session token, or another handshake.
-- Channels: define the first supported subscriptions, such as portfolio, orders, ticker updates, or account events.
+- Compatibility: decide whether WebSocket configuration should share API v2 settings or use a separate Freedom24/API v3 config.
 - Message shape: capture real inbound/outbound examples before creating public types.
 - Reconnection: define backoff, max attempts, resubscription behavior, and manual disconnect semantics.
 - Errors: decide whether stream errors are emitted, returned through callbacks, or surfaced through a typed event handler.
+
+## Reference Protocol
+
+Tradernet's Python SDK 2.2.0 provides a current reference implementation. It connects to `wss://wss.freedom24.com` with `X-NtApi-PublicKey`, `X-NtApi-Timestamp`, and `X-NtApi-Sig` query parameters. Its subscriptions include:
+
+- `["quotes", [symbols]]` with `q` events.
+- `["orderBook", [symbol]]` with `b` events.
+- `["portfolio"]`, `["orders"]`, and `["markets"]` with matching event names.
+
+Treat this as a protocol reference, not a complete client design. The Python implementation does not provide reconnection, resubscription, or heartbeat behavior, and message payloads still require live fixtures before TypeScript types are published.
 
 ## Proposed Public Surface
 

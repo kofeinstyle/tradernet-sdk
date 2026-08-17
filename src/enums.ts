@@ -25,7 +25,8 @@ export const CorporateActionTypes = {
   SPLIT: 'split',
 } as const
 
-export type CorporateActionTypesValue = (typeof CorporateActionTypes)[keyof typeof CorporateActionTypes]
+export type KnownCorporateActionType = (typeof CorporateActionTypes)[keyof typeof CorporateActionTypes]
+export type CorporateActionTypesValue = KnownCorporateActionType | (string & {})
 
 export type TradeOperationValue = (typeof TradeOperation)[keyof typeof TradeOperation]
 export type InstrumentValue = (typeof Instrument)[keyof typeof Instrument]

@@ -1,8 +1,16 @@
-import type { CorporateActionTypesValue, InstrumentValue, TradeOperationValue } from '../enums'
+import type {
+  CorporateActionTypesValue,
+  InstrumentValue,
+  KnownCorporateActionType,
+  TradeOperationValue,
+} from '../enums'
 
-export { CorporateActionTypesValue, InstrumentValue, TradeOperationValue }
+export { CorporateActionTypesValue, InstrumentValue, KnownCorporateActionType, TradeOperationValue }
 
-export type FiatCurrency = 'USD' | 'EUR'
+type OpenString<T extends string> = T | (string & {})
+
+export type KnownFiatCurrency = 'USD' | 'EUR' | 'UAH'
+export type FiatCurrency = OpenString<KnownFiatCurrency>
 
 export type FilterOperator =
   | 'eq'
@@ -16,7 +24,8 @@ export type FilterOperator =
   | 'endswith'
   | 'in'
 
-export type TransactionTypeCode = 'tax' | 'dividend' | 'commission_for_trades' | 'refund' | 'card'
+export type KnownTransactionTypeCode = 'tax' | 'dividend' | 'commission_for_trades' | 'refund' | 'card'
+export type TransactionTypeCode = OpenString<KnownTransactionTypeCode>
 
 export type TradeItem = {
   id: string
@@ -75,12 +84,12 @@ export type CorporateActionsItem = {
   tax_amount: number
   tax_currency: FiatCurrency
   q_on_ex_date: string
-  comment: string
+  comment?: string
 }
 
 export type CashFlowItem = {
   id: number
-  type_code: TransactionTypeCode | string
+  type_code: TransactionTypeCode
   date: string
   datetime: string
   currency: FiatCurrency

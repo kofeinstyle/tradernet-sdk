@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.3 - 2026-08-17
+
+- Export cash flow request, response, item, filtering, and sorting types from the package entrypoint.
+- Add reusable `SortDescriptor` and `SortDirection` types with endpoint-specific cash flow fields.
+- Make `ApiResponse` a discriminated success/error union.
+- Default broker reports to the `23:59:59` cut-off while preserving explicit `08:40:00` requests.
+- Allow corporate action reports without `report.total`.
+- Preserve autocomplete for known currencies, transaction codes, and corporate action types while accepting new API values.
+- Validate and normalize corporate action items without unsafe type assertions.
+- Document Bun installation, cash flow sorting, and the distinction between corporate action and cash flow dividends.
+
 ## 0.0.2 - 2026-06-30
 
 - Add structural runtime validation for broker report responses and cash flow responses.
@@ -14,5 +25,3 @@
 - Normalize cash flow numeric fields without mutating raw response items.
 - Publish only built `dist` artifacts in the npm package.
 - Add CI, import verification, and trusted publishing release workflow.
-
-

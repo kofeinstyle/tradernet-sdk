@@ -10,6 +10,25 @@ if (!useRealFetch()) {
   global.fetch = jest.fn()
 }
 
+const makeCorporateActionsItem = (overrides: Record<string, unknown> = {}) => ({
+  ticker: 'AAPL.US',
+  isin: 'US0378331005',
+  corporate_action_id: '2020-01-01_35_AAPL.US_0.25',
+  type_id: 'dividend',
+  date: '2020-01-10',
+  ex_date: '2020-01-01',
+  amount: 10,
+  amount_per_one: 0,
+  currency: 'USD',
+  external_tax: 10,
+  external_tax_currency: 'USD',
+  tax_amount: 1.5,
+  tax_currency: 'USD',
+  q_on_ex_date: '100.00000000',
+  comment: 'Test comment',
+  ...overrides,
+})
+
 describe('TradernetApiClient', () => {
   let client: TradernetApiClient
 
@@ -75,6 +94,34 @@ describe('TradernetApiClient', () => {
       expect(result.data).toHaveProperty('report.prtotal')
     })
 
+    it('should use the end-of-day report period by default', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ report: { detailed: [], total: {} } }),
+        })
+      }
+
+      await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-01-31' }, 'trades')
+
+      const requestOptions = (fetch as jest.Mock).mock.calls[0][1] as RequestInit
+      expect(requestOptions.body).toContain('params[time_period]=23%3A59%3A59')
+    })
+
+    it('should preserve an explicit morning report period', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ report: { detailed: [], total: {} } }),
+        })
+      }
+
+      await client.getBrokerReport({ dateFrom: '2025-01-01', dateTo: '2025-01-31', timePeriod: '08:40:00' }, 'trades')
+
+      const requestOptions = (fetch as jest.Mock).mock.calls[0][1] as RequestInit
+      expect(requestOptions.body).toContain('params[time_period]=08%3A40%3A00')
+    })
+
     it('should return an invalid response error when report.detailed is missing', async () => {
       if (!useRealFetch()) {
         ;(fetch as jest.Mock).mockResolvedValueOnce({
@@ -122,23 +169,7 @@ describe('TradernetApiClient', () => {
   describe('Get Depositary corporate_actions report', () => {
     it('should get full report', async () => {
       if (!useRealFetch()) {
-        const item = {
-          amount: 10,
-          type_id: 'dividend',
-          date: '2020-01-10',
-          amount_per_one: 0,
-          ticker: 'AAPL.US',
-          isin: 'US0378331005',
-          corporate_action_id: '2020-01-01_35_AAPL.US_0.25',
-          ex_date: '2020-01-01',
-          currency: 'USD',
-          external_tax: 10,
-          external_tax_currency: 'USD',
-          tax_amount: '-',
-          tax_currency: '',
-          q_on_ex_date: '100.00000000',
-          comment: 'Test comment',
-        }
+        const item = makeCorporateActionsItem({ tax_amount: '-', tax_currency: '' })
         const mockData = {
           success: true,
           report: {
@@ -162,6 +193,25 @@ describe('TradernetApiClient', () => {
       expect(result.data?.report.detailed[0]).toHaveProperty('tax_amount')
       expect(result.data?.report.detailed[0]).toHaveProperty('tax_currency')
       expect(result.data?.report.detailed[0].tax_amount).toEqual(0)
+    })
+
+    it('should reject incomplete corporate action items', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            report: {
+              detailed: [{ currency: 'USD' }],
+            },
+          }),
+        })
+      }
+
+      const result = await client.getBrokerReport(makeDateRange(), 'corporate_actions')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Invalid API response')
+      expect(result.message).toBe('Invalid corporate_actions item at index 0')
     })
   })
 
@@ -257,6 +307,27 @@ describe('TradernetApiClient', () => {
       expect(requestOptions.body).toContain('params[filters][0][field]=type_code')
       expect(requestOptions.body).toContain('params[filters][0][operator]=eq')
       expect(requestOptions.body).toContain('params[filters][0][value]=dividend')
+    })
+
+    it('should send user cash flow sorting as form encoded params', async () => {
+      if (!useRealFetch()) {
+        ;(fetch as jest.Mock).mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            success: true,
+            total: 0,
+            cashflow: [],
+          }),
+        })
+      }
+
+      await client.getUserCashFlows({
+        sort: [{ field: 'date', dir: 'DESC' }],
+      })
+
+      const requestOptions = (fetch as jest.Mock).mock.calls[0][1] as RequestInit
+      expect(requestOptions.body).toContain('params[sort][0][field]=date')
+      expect(requestOptions.body).toContain('params[sort][0][dir]=DESC')
     })
 
     it('should return Tradernet API errors without successful data', async () => {
@@ -407,39 +478,50 @@ describe('TradernetApiClient', () => {
 
   describe('Corporate action normalization', () => {
     it('should keep valid tax fields unchanged', () => {
-      const item = {
-        ticker: 'AAPL.US',
-        isin: 'US0378331005',
-        corporate_action_id: '2020-01-01_35_AAPL.US_0.25',
-        type_id: 'dividend',
-        date: '2020-01-10',
-        ex_date: '2020-01-01',
-        amount: 10,
-        amount_per_one: 0,
-        currency: 'USD',
-        external_tax: 10,
-        external_tax_currency: 'USD',
-        tax_amount: 1.5,
-        tax_currency: 'USD',
-        q_on_ex_date: '100.00000000',
-        comment: 'Test comment',
-      } as const
+      const item = makeCorporateActionsItem()
 
       const result = normalizeCorporateActionsItem(item)
 
-      expect(result.tax_amount).toBe(1.5)
-      expect(result.tax_currency).toBe('USD')
+      expect(result?.tax_amount).toBe(1.5)
+      expect(result?.tax_currency).toBe('USD')
     })
 
-    it('should default invalid tax fields to the action currency', () => {
+    it('should normalize numeric strings and default invalid tax fields', () => {
+      const result = normalizeCorporateActionsItem(
+        makeCorporateActionsItem({
+          amount: '10.5',
+          amount_per_one: '0.25',
+          external_tax: '2.5',
+          currency: 'EUR',
+          external_tax_currency: '',
+          tax_amount: '-',
+          tax_currency: '',
+        })
+      )
+
+      expect(result?.amount).toBe(10.5)
+      expect(result?.amount_per_one).toBe(0.25)
+      expect(result?.external_tax).toBe(2.5)
+      expect(result?.external_tax_currency).toBe('EUR')
+      expect(result?.tax_amount).toBe(0)
+      expect(result?.tax_currency).toBe('EUR')
+    })
+
+    it('should reject incomplete items', () => {
       const result = normalizeCorporateActionsItem({
-        currency: 'EUR',
+        currency: 'USD',
         tax_amount: '-',
         tax_currency: '',
       })
 
-      expect(result.tax_amount).toBe(0)
-      expect(result.tax_currency).toBe('EUR')
+      expect(result).toBeNull()
+    })
+
+    it('should allow items without comments', () => {
+      const result = normalizeCorporateActionsItem(makeCorporateActionsItem({ comment: undefined }))
+
+      expect(result).not.toBeNull()
+      expect(result?.comment).toBeUndefined()
     })
   })
 })
