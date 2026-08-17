@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a TypeScript SDK for the Tradernet API. Public exports are collected in `src/index.ts`. Core client code lives in `src/api-client.ts`, HTTP helpers in `src/http.ts`, and transformations in `src/helper.ts` and `src/mappers.ts`. API/domain types are under `src/types/`; enums are in `src/enums.ts`. Planned WebSocket work is documented in `docs/websocket-roadmap.md`.
+This is a TypeScript SDK for the Tradernet API. Public exports are collected in `src/index.ts`. Core client code lives in `src/api-client.ts`, HTTP helpers in `src/http.ts`, and transformations in `src/helper.ts` and `src/mappers.ts`. API/domain types are under `src/types/`; enums are in `src/enums.ts`. Internal priorities are tracked in `docs/roadmap.md`; detailed WebSocket research is in `docs/websocket-roadmap.md`.
 
 Tests live in `tests/` and use Jest with `ts-jest`. `tests/setup-env.js` loads test environment values. Build output goes to `dist/` and should not be edited by hand.
 

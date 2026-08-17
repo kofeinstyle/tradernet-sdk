@@ -17,6 +17,13 @@ A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 - Runtime validation at supported API boundaries.
 - No runtime dependencies.
 
+## Documentation
+
+- [Getting started](docs/getting-started.md)
+- [Broker reports](docs/broker-reports.md)
+- [User cash flows](docs/cash-flows.md)
+- [API reference](docs/api-reference.md)
+
 ## Installation
 
 ```bash

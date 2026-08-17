@@ -1,6 +1,6 @@
 # WebSocket Roadmap
 
-WebSocket support is planned, but the public API is not designed yet. Do not base implementation work on the removed commented prototypes; they were generic placeholders and may not match the actual Tradernet protocol or application needs.
+WebSocket support is planned, but it is not the next implementation milestone. See [roadmap.md](roadmap.md) for current priorities. The public WebSocket API is not designed yet. Do not base implementation work on the removed commented prototypes; they were generic placeholders and may not match the actual Tradernet protocol or application needs.
 
 ## Goals
 

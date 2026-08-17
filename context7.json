@@ -1,0 +1,15 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Tradernet SDK",
+  "description": "Typed TypeScript SDK for supported Tradernet API v2 broker report and user cash flow endpoints.",
+  "branch": "main",
+  "folders": ["docs"],
+  "excludeFiles": ["AGENTS.md", "CHANGELOG.md", "roadmap.md", "websocket-roadmap.md"],
+  "rules": [
+    "Import TradernetApiClient, constants, and types only from @kofeinstyle/tradernet-sdk.",
+    "Check response.success before accessing response.data or error fields.",
+    "Use getBrokerReport with corporate_actions for security-level dividend details and getUserCashFlows for account ledger operations.",
+    "Broker reports default to the 23:59:59 time period unless 08:40:00 is explicitly required.",
+    "Do not suggest API v3, WebSocket, order placement, or other methods that are not part of the documented public API."
+  ]
+}
