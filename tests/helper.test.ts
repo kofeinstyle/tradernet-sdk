@@ -1,4 +1,4 @@
-import { dateFormat, getFullDate, getFullMonth, isTradernetError } from '../src/helper'
+import { dateFormat, getFullDate, getFullMonth, isTradernetError, useRealFetch } from '../src/helper'
 
 describe('Helper', () => {
   it('getFullMonth', async () => {
@@ -26,5 +26,29 @@ describe('Helper', () => {
     }
 
     expect(isTradernetError(error)).toBe(true)
+  })
+
+  describe('useRealFetch', () => {
+    const originalValue = process.env.USE_REAL_FETCH
+
+    afterEach(() => {
+      if (originalValue === undefined) {
+        delete process.env.USE_REAL_FETCH
+      } else {
+        process.env.USE_REAL_FETCH = originalValue
+      }
+    })
+
+    it.each([
+      ['true', true],
+      ['TRUE', true],
+      ['1', true],
+      ['false', false],
+      ['0', false],
+      ['', false],
+    ])('parses %s as %s', (value, expected) => {
+      process.env.USE_REAL_FETCH = value
+      expect(useRealFetch()).toBe(expected)
+    })
   })
 })

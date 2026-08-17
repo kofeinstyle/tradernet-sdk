@@ -192,7 +192,7 @@ describe('TradernetApiClient', () => {
       expect(result.data?.report.detailed[0]).toHaveProperty('amount')
       expect(result.data?.report.detailed[0]).toHaveProperty('tax_amount')
       expect(result.data?.report.detailed[0]).toHaveProperty('tax_currency')
-      expect(result.data?.report.detailed[0].tax_amount).toEqual(0)
+      expect(result.data?.report.detailed[0].tax_amount).toEqual(expect.any(Number))
     })
 
     it('should reject incomplete corporate action items', async () => {

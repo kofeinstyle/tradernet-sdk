@@ -33,7 +33,8 @@ export function logger(event: string, payload: unknown) {
 }
 
 export function useRealFetch() {
-  return !!process.env.USE_REAL_FETCH
+  const value = process.env.USE_REAL_FETCH?.trim().toLowerCase()
+  return value === 'true' || value === '1'
 }
 
 export interface ApiError {
