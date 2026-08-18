@@ -2,12 +2,10 @@ name: Refresh Context7 Docs
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'README.md'
-      - 'context7.json'
-      - 'docs/**'
+    tags:
+      - '*.*.*'
+      - '!**-*'
+      - '!v*'
   workflow_dispatch:
 
 permissions:
@@ -16,12 +14,38 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Trigger Context7 refresh
         run: |
-          curl --fail-with-body --show-error --silent \
-            --request POST https://context7.com/api/v1/refresh \
-            --header 'Content-Type: application/json' \
-            --header 'Authorization: Bearer ${{ secrets.CONTEXT7_API_KEY }}' \
-            --data '{"libraryName": "/${{ github.repository }}"}'
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          for attempt in {1..20}; do
+            status="$(curl --show-error --silent \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              --request POST https://context7.com/api/v1/refresh \
+              --header 'Content-Type: application/json' \
+              --header 'Authorization: Bearer ${{ secrets.CONTEXT7_API_KEY }}' \
+              --data '{"libraryName": "/${{ github.repository }}", "branch": "main"}')"
+            body="$(cat "$response_file")"
+
+            if [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+              echo "$body"
+              exit 0
+            fi
+
+            if [[ "$status" == '400' && "$body" == *'"error":"user-has-active-task"'* ]]; then
+              echo "Context7 is already processing a library; retrying in 30 seconds ($attempt/20)."
+              sleep 30
+              continue
+            fi
+
+            echo "Context7 refresh failed with HTTP $status: $body" >&2
+            exit 1
+          done
+
+          echo 'Context7 remained busy after 20 attempts.' >&2
+          exit 1

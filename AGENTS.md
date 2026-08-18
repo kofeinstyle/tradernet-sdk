@@ -51,7 +51,7 @@ Recent history uses short, imperative or release-oriented messages, for example 
 
 Use release tags without a `v` prefix to match existing project history, for example `0.0.1` instead of `v0.0.1`.
 
-For each stable release, add its tag to the beginning of `context7.json` `previousVersions` so Context7 can index version-specific documentation. Do not add beta or alpha tags.
+For each stable release, add its tag to the beginning of `context7.json` `previousVersions` in the release commit, then push that commit before creating the tag. The Context7 refresh workflow runs when the stable tag is pushed. Do not add beta or alpha tags.
 
 Pull requests should include a short description, test results, and any API surface changes. Link related issues when available. For behavior changes, include a minimal usage example or before/after note. Do not include generated `dist/` changes unless the release process requires them.
 
