@@ -7,6 +7,9 @@ A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 [![Publish Package to npmjs](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml/badge.svg)](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/publish.yml)
 [![npm version](https://img.shields.io/npm/v/@kofeinstyle/tradernet-sdk.svg)](https://www.npmjs.com/package/@kofeinstyle/tradernet-sdk)
 
+[![Context7 Docs](https://img.shields.io/badge/Context7-Docs-6C47FF)](https://context7.com/kofeinstyle/tradernet-sdk)
+[![Refresh Context7 Docs](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/context7-refresh.yml/badge.svg)](https://github.com/kofeinstyle/tradernet-sdk/actions/workflows/context7-refresh.yml)
+
 [Tradernet API documentation](https://tradernet.com/tradernet-api/)
 
 ## Features

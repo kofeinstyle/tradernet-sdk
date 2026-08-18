@@ -56,3 +56,5 @@ Pull requests should include a short description, test results, and any API surf
 ## Security & Configuration Tips
 
 Do not commit secrets from `.env` or broker credentials used during local tests. Keep network-facing tests isolated and avoid making live API calls in unit tests unless explicitly marked and documented.
+
+Context7 refresh automation requires a repository Actions secret named `CONTEXT7_API_KEY`. Never place the API key in workflow files or documentation.
