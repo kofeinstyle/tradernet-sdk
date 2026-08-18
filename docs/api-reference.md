@@ -97,10 +97,12 @@ Known numeric instrument values include `STOCKS`, `BONDS`, `FUTURES`, `OPTIONS`,
 
 Tradernet can add currencies, transaction codes, or corporate action types without an SDK release. These fields therefore accept arbitrary strings while known values remain available for autocomplete.
 
-```ts
-import type { FiatCurrency, TransactionTypeCode } from '@kofeinstyle/tradernet-sdk'
+`KnownFiatCurrency` currently contains `'USD' | 'EUR' | 'UAH'`. Use `FiatCurrency` for API data because it also accepts currency codes introduced by Tradernet after the current SDK release.
 
-const knownCurrency: FiatCurrency = 'USD'
+```ts
+import type { FiatCurrency, KnownFiatCurrency, TransactionTypeCode } from '@kofeinstyle/tradernet-sdk'
+
+const knownCurrency: KnownFiatCurrency = 'USD'
 const newApiCurrency: FiatCurrency = 'GBP'
 
 const knownTransaction: TransactionTypeCode = 'dividend'
