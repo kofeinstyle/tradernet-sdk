@@ -3,6 +3,7 @@
   "projectTitle": "Tradernet SDK",
   "description": "Typed TypeScript SDK for supported Tradernet API v2 user profile data, broker reports, user cash flows, and read-only portfolio snapshots.",
   "branch": "main",
+  "previousVersions": [{ "tag": "0.0.4" }, { "tag": "0.0.3" }, { "tag": "0.0.2" }, { "tag": "0.0.1" }],
   "folders": ["docs"],
   "excludeFiles": ["AGENTS.md", "CHANGELOG.md", "roadmap.md", "websocket-roadmap.md"],
   "rules": [
