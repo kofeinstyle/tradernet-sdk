@@ -32,11 +32,6 @@ export function logger(event: string, payload: unknown) {
   console.log({ event, payload })
 }
 
-export function useRealFetch() {
-  const value = process.env.USE_REAL_FETCH?.trim().toLowerCase()
-  return value === 'true' || value === '1'
-}
-
 export interface ApiError {
   errMsg: string
   error: string

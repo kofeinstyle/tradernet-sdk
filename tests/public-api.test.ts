@@ -9,6 +9,9 @@ import type {
   KnownCorporateActionType,
   KnownFiatCurrency,
   KnownTransactionTypeCode,
+  PortfolioAccount,
+  PortfolioPosition,
+  PortfolioResponse,
   ReportQueryType,
   SortDescriptor,
   SortDirection,
@@ -18,6 +21,8 @@ import type {
   UserCashFlowsParams,
   UserCashFlowsParamsFilter,
   UserCashFlowsParamsSort,
+  UserProfile,
+  UserProfileResponse,
 } from '../src'
 
 const unwrapResponse = (response: ApiResponse<number>): number | string => {
@@ -104,5 +109,39 @@ describe('Public API types', () => {
     }
 
     expect(getDetailedReport(response)).toEqual([])
+  })
+
+  it('exports portfolio snapshot types', () => {
+    const account: PortfolioAccount = {
+      curr: 'USD',
+      currval: 1,
+      forecast_in: 0,
+      forecast_out: 0,
+      s: 1000,
+    }
+    const position: PortfolioPosition = {
+      acc_pos_id: 1,
+      curr: 'USD',
+      currval: 1,
+      i: 'TEST.US',
+      market_value: 1000,
+      mkt_price: 100,
+      q: 10,
+    }
+    const response: PortfolioResponse = {
+      success: true,
+      data: { loaded: true, accounts: [account], positions: [position] },
+    }
+
+    expect(response.data?.accounts).toEqual([account])
+    expect(response.data?.positions).toEqual([position])
+  })
+
+  it('exports user profile types', () => {
+    const profile: UserProfile = { homeCurrency: 'USD', main_curr: 'USD' }
+    const response: UserProfileResponse = { success: true, data: profile }
+
+    expect(response.data?.homeCurrency).toBe('USD')
+    expect(response.data?.main_curr).toBe('USD')
   })
 })

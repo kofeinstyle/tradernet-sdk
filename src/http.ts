@@ -12,7 +12,7 @@ type RequestParams = ReportQueryParams | UserCashFlowsParams
 
 type RequestPayload = {
   cmd: ApiCommand
-  params: RequestParams
+  params?: RequestParams
   apiKey: string
   nonce: number
 }
@@ -49,10 +49,14 @@ export class HttpClient {
     this.verbose = config.verbose === true
   }
 
-  public async makeRequest<T>(cmd: ApiCommand, params: RequestParams, attempt: number = 1): Promise<ApiResponse<T>> {
+  public async makeRequest<T>(
+    cmd: ApiCommand,
+    params: RequestParams | undefined = undefined,
+    attempt: number = 1
+  ): Promise<ApiResponse<T>> {
     const payload: RequestPayload = {
       cmd: cmd,
-      params,
+      ...(params === undefined ? {} : { params }),
       apiKey: this.apiKey,
       nonce: Math.floor(Date.now() * 10000),
     }
@@ -182,10 +186,7 @@ export class HttpClient {
 
   private hasApiError(response: unknown): response is ApiErrorResponse {
     return (
-      typeof response === 'object' &&
-      response !== null &&
-      'error' in response &&
-      typeof response.error === 'string'
+      typeof response === 'object' && response !== null && 'error' in response && typeof response.error === 'string'
     )
   }
 

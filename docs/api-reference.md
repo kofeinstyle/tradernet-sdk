@@ -13,6 +13,14 @@ const client = new TradernetApiClient({
 })
 ```
 
+### getUserProfile
+
+```ts
+getUserProfile(): Promise<UserProfileResponse>
+```
+
+Returns a `UserProfile` containing `homeCurrency` and the original `main_curr` field. The underlying `getOPQ` request has no parameters, and unrelated initial-user-data sections are not exposed.
+
 ### getBrokerReport
 
 ```ts
@@ -32,9 +40,17 @@ getUserCashFlows(params?: UserCashFlowsParams): Promise<UserCashFlowResponse>
 
 Parameters support pagination, filtering, sorting, grouping, and Tradernet numeric flags.
 
+### getPortfolio
+
+```ts
+getPortfolio(): Promise<PortfolioResponse>
+```
+
+Returns a read-only `PortfolioSnapshot` with normalized `accounts` and `positions` arrays. The request has no parameters.
+
 ## Response Types
 
-Both methods return `ApiResponse<T>`:
+Public methods return `ApiResponse<T>`:
 
 ```ts
 type ApiSuccessResponse<T> = {
@@ -84,10 +100,12 @@ Known numeric instrument values include `STOCKS`, `BONDS`, `FUTURES`, `OPTIONS`,
 | Group          | Exported types                                                                                                                                   |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Client         | `TradernetConfig`                                                                                                                                |
-| Responses      | `ApiResponse`, `ApiSuccessResponse`, `ApiErrorResponse`, `CashFlowResponse`                                                                      |
+| Responses      | `ApiResponse`, `ApiSuccessResponse`, `ApiErrorResponse`, `CashFlowResponse`, `PortfolioResponse`, `UserProfileResponse`                          |
 | Broker reports | `BrokerReportResponse`, `ReportQueryFilter`, `ReportQueryResult`, `ReportQueryType`, `ReportTimePeriod`, `ReportResponse`, `ReportResponseShort` |
 | Report items   | `TradeItem`, `CorporateActionsItem`, `AccountAtEndItem`, `CommissionItem`, `CashFlowReportItem`, `SecuritiesFlowItem`                            |
 | Cash flows     | `UserCashFlowResponse`, `UserCashFlowsParams`, `UserCashFlowsParamsFilter`, `UserCashFlowsParamsSort`, `UserCashFlowsField`, `CashFlowItem`      |
+| Portfolio      | `PortfolioSnapshot`, `PortfolioAccount`, `PortfolioPosition`                                                                                     |
+| User profile   | `UserProfile`                                                                                                                                    |
 | Sorting        | `SortDescriptor`, `SortDirection`, `FilterOperator`                                                                                              |
 | Totals         | `CashTotal`, `ReportTotal`, `ReportProjectedTotal`                                                                                               |
 | Open values    | `FiatCurrency`, `TransactionTypeCode`, `CorporateActionTypesValue`, `TradeOperationValue`, `InstrumentValue`                                     |

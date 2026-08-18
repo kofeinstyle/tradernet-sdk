@@ -11,7 +11,7 @@ A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 
 ## Features
 
-- Typed broker reports and user cash flow requests.
+- Typed user profile, broker reports, user cash flows, and read-only portfolio snapshots.
 - ESM and CommonJS builds with generated TypeScript declarations.
 - Retries for network errors, timeouts, HTTP 429, and HTTP 5xx responses.
 - Runtime validation at supported API boundaries.
@@ -20,8 +20,10 @@ A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 ## Documentation
 
 - [Getting started](docs/getting-started.md)
+- [User profile](docs/user-profile.md)
 - [Broker reports](docs/broker-reports.md)
 - [User cash flows](docs/cash-flows.md)
+- [Portfolio snapshots](docs/portfolio.md)
 - [API reference](docs/api-reference.md)
 
 ## Installation
@@ -42,6 +44,18 @@ const client = new TradernetApiClient({
   apiKey: process.env.TRADERNET_API_KEY!,
   apiSecret: process.env.TRADERNET_API_SECRET!,
 })
+```
+
+## User Profile
+
+`getUserProfile()` returns Tradernet's user currency metadata without exposing the complete `getOPQ` payload.
+
+```ts
+const result = await client.getUserProfile()
+
+if (result.success) {
+  console.log(result.data.homeCurrency, result.data.main_curr)
+}
 ```
 
 ## Broker Reports
@@ -94,6 +108,22 @@ if (result.success) {
 
 Filtering and sorting support `date`, `sum`, `currency`, `comment`, and `type_code`. Sort directions are `ASC` and `DESC`.
 
+## Portfolio Snapshot
+
+`getPortfolio()` returns current account balances and open positions. It does not require request parameters.
+
+```ts
+const result = await client.getPortfolio()
+
+if (result.success) {
+  for (const position of result.data.positions) {
+    console.log(position.i, position.q, position.curr, position.market_value)
+  }
+} else {
+  console.error(result.error, result.message)
+}
+```
+
 ## Error Handling
 
 Methods return a discriminated `ApiResponse<T>` and do not throw for HTTP or Tradernet API errors. Checking `success` narrows the result to either data or error fields.
@@ -128,7 +158,10 @@ npm install
 npm run verify
 npm run test:watch
 npm run test:coverage
+npm run playground -- help
 ```
+
+Jest always uses mocked HTTP responses. Use the read-only [live API playground](playground/README.md) for explicit checks with local credentials.
 
 See [AGENTS.md](AGENTS.md) for repository and release conventions.
 

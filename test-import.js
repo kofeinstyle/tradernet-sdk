@@ -9,6 +9,14 @@ async function verifyImport(label, loadModule) {
     throw new Error(`${label}: TradernetApiClient export is missing`)
   }
 
+  if (typeof sdk.TradernetApiClient.prototype.getPortfolio !== 'function') {
+    throw new Error(`${label}: getPortfolio method is missing`)
+  }
+
+  if (typeof sdk.TradernetApiClient.prototype.getUserProfile !== 'function') {
+    throw new Error(`${label}: getUserProfile method is missing`)
+  }
+
   if (!sdk.CorporateActionTypes || sdk.CorporateActionTypes.DIVIDEND !== 'dividend') {
     throw new Error(`${label}: CorporateActionTypes export is missing`)
   }

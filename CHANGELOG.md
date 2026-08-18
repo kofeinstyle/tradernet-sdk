@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.4 - 2026-08-18
+
+- Add a typed, read-only `getPortfolio()` snapshot for current account balances and open positions.
+- Add a typed `getUserProfile()` method that exposes `homeCurrency` and `main_curr` without returning the complete `getOPQ` payload.
+- Support signed Tradernet API v2 commands that do not have request parameters.
+- Validate portfolio envelopes and rows while normalizing documented numeric fields.
+- Separate live API diagnostics into an explicit playground and keep Jest tests fully mocked.
+
 ## 0.0.3 - 2026-08-17
 
 - Export cash flow request, response, item, filtering, and sorting types from the package entrypoint.

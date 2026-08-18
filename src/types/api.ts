@@ -1,6 +1,10 @@
-import type { CashFlowItem, CorporateActionsItem, FilterOperator, TradeItem } from './common'
+import type { CorporateActionsItem, TradeItem } from './broker-reports'
+import type { CashFlowItem } from './cash-flows'
+import type { FilterOperator } from './common'
+import type { PortfolioSnapshot } from './portfolio'
+import type { UserProfile } from './user-profile'
 
-export type ApiCommand = 'getBrokerReport' | 'getUserCashFlows'
+export type ApiCommand = 'getBrokerReport' | 'getUserCashFlows' | 'getPositionJson' | 'getOPQ'
 
 export interface TradernetConfig {
   apiKey: string
@@ -127,3 +131,5 @@ export type ReportQueryResult<T extends ReportQueryType> = ReportQueryResultMap[
 
 export type BrokerReportResponse<T extends ReportQueryType> = ApiResponse<ReportQueryResult<T>>
 export type UserCashFlowResponse = ApiResponse<CashFlowResponse>
+export type PortfolioResponse = ApiResponse<PortfolioSnapshot>
+export type UserProfileResponse = ApiResponse<UserProfile>

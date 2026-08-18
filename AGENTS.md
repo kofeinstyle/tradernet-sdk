@@ -1,5 +1,23 @@
 # Repository Guidelines
 
+## Secret File Access Prohibition
+
+Never open, read, search, parse, source, print, copy, or modify secret files.
+
+Protected patterns include:
+- `.env`, `.env.*`, `*.env`
+- `*.pem`, `*.key`, `*.p12`, `*.pfx`
+- `.npmrc`, `.netrc`
+- `id_rsa`, `id_ed25519`
+- credential or token files
+
+Do not use commands that may expose their contents, including `cat`, `sed`,
+`grep`, `rg`, `head`, `tail`, `env`, `printenv`, or `git diff` against these files.
+
+You may only check whether a protected file exists. Programs may load secrets at
+runtime only when the user explicitly requests a live operation. Never print,
+log, summarize, transmit, or include secret values in tool calls.
+
 ## Project Structure & Module Organization
 
 This is a TypeScript SDK for the Tradernet API. Public exports are collected in `src/index.ts`. Core client code lives in `src/api-client.ts`, HTTP helpers in `src/http.ts`, and transformations in `src/helper.ts` and `src/mappers.ts`. API/domain types are under `src/types/`; enums are in `src/enums.ts`. Internal priorities are tracked in `docs/roadmap.md`; detailed WebSocket research is in `docs/websocket-roadmap.md`.

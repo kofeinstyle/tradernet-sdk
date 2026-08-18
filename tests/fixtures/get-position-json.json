@@ -1,0 +1,72 @@
+{
+  "result": {
+    "ps": {
+      "acc": [
+        {
+          "curr": "USD",
+          "currval": 1,
+          "forecast_in": 0,
+          "forecast_out": 0,
+          "k": 1,
+          "s": 1000,
+          "sql_exec_tm": "2026-01-01 12:00:00",
+          "t": 1000,
+          "t2_in": 0,
+          "t2_out": 0
+        },
+        {
+          "curr": "EUR",
+          "currval": 1.1,
+          "forecast_in": 0,
+          "forecast_out": 0,
+          "k": 1,
+          "s": 500,
+          "sql_exec_tm": "2026-01-01 12:00:00",
+          "t": 500,
+          "t2_in": 0,
+          "t2_out": 0
+        }
+      ],
+      "key": "sanitized-fixture",
+      "loaded": true,
+      "pos": [
+        {
+          "acc_pos_id": 1,
+          "accruedint_a": 0,
+          "acd": 0,
+          "bal_price_a": 100,
+          "base_contract_code": "",
+          "base_currency": "USD",
+          "close_price": 102,
+          "curr": "USD",
+          "currval": 1,
+          "face_val_a": 0,
+          "fv": 0,
+          "go": 0,
+          "i": "TEST.US",
+          "instr_id": 1,
+          "issue_nb": "US0000000001",
+          "k": 1,
+          "ltr": "US",
+          "market_value": 1020,
+          "mkt_id": 1,
+          "mkt_price": 102,
+          "name": "Test Security",
+          "name2": "Test Security",
+          "open_bal": 10,
+          "price_a": 100,
+          "profit_close": 20,
+          "profit_price": 20,
+          "q": 10,
+          "s": 1000,
+          "scheme_calc": "stock",
+          "sql_exec_tm": "2026-01-01 12:00:00",
+          "sql_signal_tm": "2026-01-01 12:00:00",
+          "t": 1000,
+          "vm": 0,
+          "Yield": 0
+        }
+      ]
+    }
+  }
+}

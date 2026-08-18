@@ -1,9 +1,15 @@
 import { logger } from './helper'
 import { HttpClient } from './http'
-import { normalizeCorporateActionsItem } from './mappers'
+import {
+  normalizeCorporateActionsItem,
+  normalizePortfolioAccount,
+  normalizePortfolioPosition,
+  normalizeUserProfile,
+} from './mappers'
 import type {
   BrokerReportResponse,
   CashFlowResponse,
+  PortfolioResponse,
   ReportQueryFilter,
   ReportQueryParams,
   ReportQueryResult,
@@ -11,8 +17,9 @@ import type {
   TradernetConfig,
   UserCashFlowResponse,
   UserCashFlowsParams,
+  UserProfileResponse,
 } from './types/api'
-import type { CashFlowItem } from './types/common'
+import type { CashFlowItem } from './types/cash-flows'
 
 type ReportWithDetailed = {
   report: {
@@ -137,6 +144,114 @@ export class TradernetApiClient {
     }
   }
 
+  async getPortfolio(): Promise<PortfolioResponse> {
+    const result = await this.httpClient.makeRequest<unknown>('getPositionJson')
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+        errorObject: result.errorObject,
+        message: result.message,
+      }
+    }
+
+    const state = this.getPortfolioState(result.data)
+    if (!state) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'Missing result.ps data for getPortfolio',
+      }
+    }
+
+    if (!Array.isArray(state.acc)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'result.ps.acc must be an array for getPortfolio',
+      }
+    }
+
+    if (!Array.isArray(state.pos)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'result.ps.pos must be an array for getPortfolio',
+      }
+    }
+
+    if (typeof state.loaded !== 'boolean') {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'result.ps.loaded must be a boolean for getPortfolio',
+      }
+    }
+
+    const accounts = []
+    for (const [index, item] of state.acc.entries()) {
+      const account = normalizePortfolioAccount(item)
+      if (!account) {
+        return {
+          success: false,
+          error: 'Invalid API response',
+          message: `Invalid portfolio account at index ${index}`,
+        }
+      }
+      accounts.push(account)
+    }
+
+    const positions = []
+    for (const [index, item] of state.pos.entries()) {
+      const position = normalizePortfolioPosition(item)
+      if (!position) {
+        return {
+          success: false,
+          error: 'Invalid API response',
+          message: `Invalid portfolio position at index ${index}`,
+        }
+      }
+      positions.push(position)
+    }
+
+    return {
+      success: true,
+      data: {
+        loaded: state.loaded,
+        accounts,
+        positions,
+      },
+    }
+  }
+
+  async getUserProfile(): Promise<UserProfileResponse> {
+    const result = await this.httpClient.makeRequest<unknown>('getOPQ')
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+        errorObject: result.errorObject,
+        message: result.message,
+      }
+    }
+
+    const profile = normalizeUserProfile(result.data)
+    if (!profile) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'Missing homeCurrency or main_curr data for getUserProfile',
+      }
+    }
+
+    return {
+      success: true,
+      data: profile,
+    }
+  }
+
   private hasDetailedReport<T extends ReportQueryType>(
     data: ReportQueryResult<T> | null | undefined
   ): data is ReportQueryResult<T> & ReportWithDetailed {
@@ -153,5 +268,17 @@ export class TradernetApiClient {
 
   private hasObjectItems(items: unknown[]): items is Record<string, unknown>[] {
     return items.every(item => typeof item === 'object' && item !== null && !Array.isArray(item))
+  }
+
+  private getPortfolioState(data: unknown): Record<string, unknown> | null {
+    if (!this.isRecord(data) || !this.isRecord(data.result) || !this.isRecord(data.result.ps)) {
+      return null
+    }
+
+    return data.result.ps
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
   }
 }
