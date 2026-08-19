@@ -1,4 +1,4 @@
-import { TradernetApiClient } from '../dist/index.js'
+import { OrderStatuses, TradernetApiClient } from '../dist/index.js'
 
 const reportTypes = new Set([
   'corporate_actions',
@@ -9,18 +9,24 @@ const reportTypes = new Set([
   'securities_flows',
 ])
 const reportPeriods = new Set(['23:59:59', '08:40:00'])
+const orderStatusNames = new Map(Object.entries(OrderStatuses).map(([name, code]) => [code, name]))
 
 const usage = `Tradernet SDK live playground
 
 Usage:
   npm run playground -- user-profile
   npm run playground -- portfolio [--full]
+  npm run playground -- orders [--all] [--full]
+  npm run playground -- orders-history [dateFrom] [dateTo] [--full]
   npm run playground -- cash-flows [take] [--full]
   npm run playground -- broker-report <type> [dateFrom] [dateTo] [timePeriod] [--full]
 
 Examples:
   npm run playground -- user-profile
   npm run playground -- portfolio
+  npm run playground -- orders
+  npm run playground -- orders --all
+  npm run playground -- orders-history 2026-01-01 2026-12-31 --full
   npm run playground -- cash-flows 20 --full
   npm run playground -- broker-report corporate_actions 2026-01-01 2026-12-31
 
@@ -29,7 +35,8 @@ The default output is a summary. --full prints real account data to the local te
 
 const rawArgs = process.argv.slice(2)
 const fullOutput = rawArgs.includes('--full')
-const [command, ...args] = rawArgs.filter(argument => argument !== '--full')
+const allOrders = rawArgs.includes('--all')
+const [command, ...args] = rawArgs.filter(argument => argument !== '--full' && argument !== '--all')
 
 if (!command || command === 'help' || command === '--help' || command === '-h') {
   console.log(usage)
@@ -88,6 +95,35 @@ async function runPortfolio() {
   }))
 }
 
+async function runOrders() {
+  const activeOnly = !allOrders
+  const result = await client.getOrders({ activeOnly })
+  printResult(result, data => ({
+    command: 'orders',
+    activeOnly,
+    orders: data.orders.length,
+    tickers: [...new Set(data.orders.map(item => item.instr))],
+  }))
+}
+
+async function runOrdersHistory() {
+  const [dateFrom = yearStart, dateTo = today] = args
+  const result = await client.getOrdersHistory({ dateFrom, dateTo })
+  printResult(result, data => {
+    const statuses = [...new Set(data.orders.map(order => order.stat))]
+
+    return {
+      command: 'orders-history',
+      dateFrom,
+      dateTo,
+      orders: data.orders.length,
+      trades: data.orders.reduce((total, order) => total + (order.trade?.length ?? 0), 0),
+      statuses,
+      statusNames: statuses.map(status => orderStatusNames.get(status) ?? `UNKNOWN_${status}`),
+    }
+  })
+}
+
 async function runUserProfile() {
   const result = await client.getUserProfile()
   printResult(result, data => ({
@@ -136,6 +172,10 @@ try {
     await runUserProfile()
   } else if (command === 'portfolio') {
     await runPortfolio()
+  } else if (command === 'orders') {
+    await runOrders()
+  } else if (command === 'orders-history') {
+    await runOrdersHistory()
   } else if (command === 'cash-flows') {
     await runCashFlows()
   } else if (command === 'broker-report') {

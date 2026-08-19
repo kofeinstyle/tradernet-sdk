@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.5 - 2026-08-19
+
+- Add a typed, read-only `getOrders()` method with an `activeOnly` filter.
+- Add a typed, read-only `getOrdersHistory()` method with explicit date boundaries and normalized execution trades.
+- Add open `OrderStatus` typing and constants for documented Tradernet order statuses.
+- Add typed order operation, order type, expiration, and all-or-none values.
+- Normalize documented order numeric fields and remove account login metadata, temporary identifiers, and raw trade details from the public response.
+- Add mocked coverage for populated, empty, malformed, and API-error order responses.
+- Add a read-only playground command and document the live-validated active-order mode.
+
 ## 0.0.4 - 2026-08-18
 
 - Add a typed, read-only `getPortfolio()` snapshot for current account balances and open positions.

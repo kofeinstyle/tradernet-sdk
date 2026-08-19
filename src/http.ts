@@ -1,6 +1,14 @@
 import crypto from 'crypto'
 import { TradernetRequestLimitError, isTradernetError, logger } from './helper'
-import { ApiCommand, ApiResponse, ReportQueryParams, TradernetConfig, UserCashFlowsParams } from './types/api'
+import {
+  ApiCommand,
+  ApiResponse,
+  OrdersHistoryParams,
+  OrdersParams,
+  ReportQueryParams,
+  TradernetConfig,
+  UserCashFlowsParams,
+} from './types/api'
 
 type RequestHeaders = {
   'Content-Type': string
@@ -8,7 +16,7 @@ type RequestHeaders = {
   'X-NtApi-PublicKey': string
 }
 
-type RequestParams = ReportQueryParams | UserCashFlowsParams
+type RequestParams = OrdersHistoryParams | OrdersParams | ReportQueryParams | UserCashFlowsParams
 
 type RequestPayload = {
   cmd: ApiCommand

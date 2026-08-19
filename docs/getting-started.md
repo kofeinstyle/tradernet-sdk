@@ -1,6 +1,6 @@
 # Getting Started
 
-`@kofeinstyle/tradernet-sdk` is a server-side TypeScript client for the supported Tradernet API v2 endpoints. It provides typed user profile data, broker reports, user cash flow requests, and read-only portfolio snapshots.
+`@kofeinstyle/tradernet-sdk` is a server-side TypeScript client for the supported Tradernet API v2 endpoints. It provides typed user profile data, broker reports, user cash flow requests, read-only portfolio snapshots, and orders.
 
 ## Installation
 
@@ -76,5 +76,7 @@ The client currently exposes:
 - `getBrokerReport(filter, type)`
 - `getUserCashFlows(params?)`
 - `getPortfolio()`
+- `getOrders(filter?)`
+- `getOrdersHistory(filter)`
 
 API v3 and WebSocket functionality are not part of the public package API.

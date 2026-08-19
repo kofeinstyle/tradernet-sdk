@@ -4,9 +4,9 @@ This is an internal planning document, not a public API contract. Planned names 
 
 ## Status
 
-- **Delivered:** signed Tradernet API v2 transport, broker reports, user cash flows, typed success/error responses, runtime validation, retries, ESM/CJS builds, automated npm publishing, Context7 documentation, typed read-only portfolio snapshots, and confirmed user currency metadata through `getUserProfile()`.
-- **In progress:** prepare the portfolio and user-profile additions for the `0.0.4` release and consumer integration.
-- **Next functional milestone:** upgrade the consuming server and validate portfolio retrieval against the production account.
+- **Delivered:** signed Tradernet API v2 transport, broker reports, user cash flows, typed success/error responses, runtime validation, retries, ESM/CJS builds, automated npm publishing, Context7 documentation, typed read-only portfolio snapshots, confirmed user currency metadata through `getUserProfile()`, and production consumer integration for SDK `0.0.4`.
+- **In progress:** prepare the typed, read-only active-orders API for release.
+- **Next functional milestone:** publish `getOrders()` and map order rows at the consuming server boundary.
 - **Backlog:** explicit cross-rate support when conversion is required, API v3 transport, additional read-only endpoints, and WebSocket updates when a concrete consumer workflow requires them.
 
 ## Portfolio Snapshot
@@ -47,28 +47,58 @@ Tradernet and the Python SDK use the `getPositionJson` command without request p
 
 ### Phase 3: Consumer Integration
 
-- Publish a new SDK version and identify any required consumer changes before release.
-- Upgrade the consuming server and map SDK rows at the application boundary.
-- Expose a read-only portfolio endpoint or scheduled snapshot workflow.
-- Start without database persistence. Add snapshot history only when a reporting or change-tracking requirement is defined.
-- Verify the integration against the production account without logging sensitive portfolio data.
+- [x] Publish SDK `0.0.4` and identify the required consumer changes.
+- [x] Upgrade the consuming server and map SDK rows at the application boundary.
+- [x] Expose a read-only portfolio endpoint.
+- [x] Start without database persistence. Add snapshot history only when a reporting or change-tracking requirement is defined.
+- [x] Verify the integration against the production account without logging sensitive portfolio data.
 
 ### Acceptance Criteria
 
-- A live portfolio request succeeds with existing API credentials.
-- Empty and multi-currency portfolios have deterministic typed results.
-- Unexpected response shapes return `ApiErrorResponse` instead of unsafe casts.
-- Unit tests, type checking, build, and package import verification pass.
-- The consuming server can retrieve and map the current portfolio after upgrading the package.
+- [x] A live portfolio request succeeds with existing API credentials.
+- [x] Empty and multi-currency portfolios have deterministic typed results.
+- [x] Unexpected response shapes return `ApiErrorResponse` instead of unsafe casts.
+- [x] Unit tests, type checking, build, and package import verification pass.
+- [x] The consuming server can retrieve and map the current portfolio after upgrading the package.
+
+## Orders
+
+### Confirmed Contract
+
+- Python SDK 2.2.0 exposes current-period orders through `get_placed(active=True)`.
+- Tradernet API v2 uses `getNotifyOrderJson` with `active_only: 1`.
+- The response envelope is `result.orders`; active rows are in the optional `order` array.
+- A missing `order` property represents an empty active-order list.
+- The internal response key and account login fields are not part of the public SDK response.
+- A populated live response passed runtime validation through the playground. Required and optional numeric fields were JSON numbers, and order timestamps were strings.
+
+### Phase 1: Add SDK Support
+
+- [x] Add the typed `getOrders()` method, `activeOnly` filter, and public response types.
+- [x] Normalize documented numeric fields and validate required order fields.
+- [x] Add mocked tests for populated, empty, malformed, and API-error responses.
+- [x] Document the method and add an explicit playground command.
+
+### Phase 2: Validate and Integrate
+
+- [x] Verify a populated response through the live playground.
+- [x] Verify that `activeOnly: false` is accepted and returns the documented shape through the live playground.
+- [ ] Confirm the range and status variants of non-active orders when the account produces a distinct broader response.
+- [x] Run `getOrdersHistory` through the playground and confirm the `orders.order` response envelope.
+- [x] Add validated history types, normalized execution trades, and stripping of account identifiers and raw trade details.
+- [ ] Confirm a genuinely empty live response when the account has no active orders. The reference contract and mocked empty-response test already cover this shape.
+- [ ] Publish a new SDK version.
+- [ ] Upgrade the consuming server and map order rows to an application DTO.
 
 ## Later Work
 
 Prioritize later endpoints from actual consumer requirements rather than adding broad API coverage speculatively.
 
-1. Evaluate API v3 as a separate transport change after the portfolio snapshot works on the current v2 client.
-2. Add read-only orders, security reference data, or quotes when required by a server workflow.
-3. Add portfolio/order WebSocket subscriptions only when polling or on-demand snapshots are insufficient.
-4. Do not add order placement or other write operations without explicit safety requirements and integration tests.
+1. Add read-only quotes when current portfolio valuation or current unrealized profit is required by the consumer.
+2. Evaluate API v3 as a separate transport change after the portfolio snapshot works on the current v2 client.
+3. Add security reference data when required by a server workflow.
+4. Add portfolio/order WebSocket subscriptions only when polling or on-demand snapshots are insufficient.
+5. Do not add order placement or other write operations without explicit safety requirements and integration tests.
 
 The detailed WebSocket investigation remains in [websocket-roadmap.md](websocket-roadmap.md), but it is not the next implementation milestone.
 

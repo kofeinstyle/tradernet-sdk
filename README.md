@@ -14,7 +14,7 @@ A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 
 ## Features
 
-- Typed user profile, broker reports, user cash flows, and read-only portfolio snapshots.
+- Typed user profile, broker reports, user cash flows, read-only portfolio snapshots, and orders.
 - ESM and CommonJS builds with generated TypeScript declarations.
 - Retries for network errors, timeouts, HTTP 429, and HTTP 5xx responses.
 - Runtime validation at supported API boundaries.
@@ -27,6 +27,7 @@ A typed TypeScript/JavaScript client for supported Tradernet API endpoints.
 - [Broker reports](docs/broker-reports.md)
 - [User cash flows](docs/cash-flows.md)
 - [Portfolio snapshots](docs/portfolio.md)
+- [Orders](docs/orders.md)
 - [API reference](docs/api-reference.md)
 
 ## Installation
@@ -125,6 +126,31 @@ if (result.success) {
 } else {
   console.error(result.error, result.message)
 }
+```
+
+## Orders
+
+`getOrders()` returns active orders by default. Pass `activeOnly: false` to include non-active orders in Tradernet's current period. The method does not place, modify, or cancel orders.
+
+```ts
+const result = await client.getOrders({ activeOnly: true })
+
+if (result.success) {
+  for (const order of result.data.orders) {
+    console.log(order.instr, order.q, order.leaves_qty, order.cur, order.p)
+  }
+} else {
+  console.error(result.error, result.message)
+}
+```
+
+`getOrdersHistory()` returns orders and their execution trades for an explicit period:
+
+```ts
+const history = await client.getOrdersHistory({
+  dateFrom: '2026-01-01',
+  dateTo: '2026-01-31',
+})
 ```
 
 ## Error Handling

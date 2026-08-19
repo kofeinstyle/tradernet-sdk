@@ -1,4 +1,5 @@
 import type { CorporateActionsItem } from './types/broker-reports'
+import type { Order, OrderTrade } from './types/orders'
 import type { PortfolioAccount, PortfolioPosition } from './types/portfolio'
 import type { UserProfile } from './types/user-profile'
 
@@ -111,6 +112,43 @@ const portfolioPositionOptionalStringFields = [
   'sql_signal_tm',
 ] as const
 
+const orderRequiredNumericFields = ['id', 'stat', 'oper', 'type', 'p', 'q', 'leaves_qty'] as const
+const orderOptionalNumericFields = [
+  'order_id',
+  'stat_orig',
+  'stop',
+  'stop_init_price',
+  'stop_activated',
+  'aon',
+  'exp',
+  'rep',
+  'stat_prev',
+  'trailing',
+  'trailing_price',
+  'instr_type',
+  'curr_q',
+  'mkt_id',
+] as const
+const orderRequiredStringFields = ['date', 'instr', 'cur'] as const
+const orderOptionalStringFields = ['stat_d', 'name', 'name2', 'order_nb', 'condition', 'text'] as const
+const orderTradeRequiredNumericFields = ['id', 'p', 'q', 'v'] as const
+const orderTradeOptionalNumericFields = ['profit', 'acd', 'fv', 'go_sum', 'before_q', 'after_q'] as const
+const orderTradeRequiredStringFields = ['date'] as const
+const orderTradeOptionalStringFields = ['trade_d_exch', 'pay_d'] as const
+const orderTradePublicFields = [
+  ...orderTradeRequiredNumericFields,
+  ...orderTradeOptionalNumericFields,
+  ...orderTradeRequiredStringFields,
+  ...orderTradeOptionalStringFields,
+] as const
+const orderPublicFields = [
+  ...orderRequiredNumericFields,
+  ...orderOptionalNumericFields,
+  ...orderRequiredStringFields,
+  ...orderOptionalStringFields,
+  'trade',
+] as const
+
 const normalizeNumericFields = (
   result: Record<string, unknown>,
   requiredFields: readonly string[],
@@ -159,6 +197,22 @@ const hasOptionalStringFields = (item: Record<string, unknown>, fields: readonly
   return fields.every(field => item[field] === undefined || item[field] === null || typeof item[field] === 'string')
 }
 
+const hasRequiredStringFields = (item: Record<string, unknown>, fields: readonly string[]): boolean => {
+  return fields.every(field => typeof item[field] === 'string' && item[field].trim() !== '')
+}
+
+const isBinaryFlag = (value: unknown): value is 0 | 1 => value === 0 || value === 1
+
+const pickFields = (item: Record<string, unknown>, fields: readonly string[]): Record<string, unknown> => {
+  const result: Record<string, unknown> = {}
+  for (const field of fields) {
+    if (item[field] !== undefined) {
+      result[field] = item[field]
+    }
+  }
+  return result
+}
+
 const isPortfolioAccount = (item: unknown): item is PortfolioAccount => {
   if (!isRecord(item)) {
     return false
@@ -181,6 +235,32 @@ const isPortfolioPosition = (item: unknown): item is PortfolioPosition => {
     typeof item.i === 'string' &&
     hasNumericFields(item, portfolioPositionRequiredNumericFields, portfolioPositionOptionalNumericFields) &&
     hasOptionalStringFields(item, portfolioPositionOptionalStringFields)
+  )
+}
+
+const isOrder = (item: unknown): item is Order => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return (
+    hasRequiredStringFields(item, orderRequiredStringFields) &&
+    hasNumericFields(item, orderRequiredNumericFields, orderOptionalNumericFields) &&
+    (item.aon === undefined || item.aon === null || isBinaryFlag(item.aon)) &&
+    hasOptionalStringFields(item, orderOptionalStringFields) &&
+    (item.trade === undefined || item.trade === null || (Array.isArray(item.trade) && item.trade.every(isOrderTrade)))
+  )
+}
+
+const isOrderTrade = (item: unknown): item is OrderTrade => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return (
+    hasRequiredStringFields(item, orderTradeRequiredStringFields) &&
+    hasNumericFields(item, orderTradeRequiredNumericFields, orderTradeOptionalNumericFields) &&
+    hasOptionalStringFields(item, orderTradeOptionalStringFields)
   )
 }
 
@@ -208,6 +288,50 @@ export const normalizePortfolioPosition = (item: unknown): PortfolioPosition | n
   }
 
   return isPortfolioPosition(result) ? result : null
+}
+
+export const normalizeOrder = (item: unknown): Order | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  if (!normalizeNumericFields(result, orderRequiredNumericFields, orderOptionalNumericFields)) {
+    return null
+  }
+
+  if (result.trade !== undefined && result.trade !== null) {
+    if (!Array.isArray(result.trade)) {
+      return null
+    }
+
+    const trades = []
+    for (const trade of result.trade) {
+      const normalizedTrade = normalizeOrderTrade(trade)
+      if (!normalizedTrade) {
+        return null
+      }
+      trades.push(normalizedTrade)
+    }
+    result.trade = trades
+  }
+
+  const publicOrder = pickFields(result, orderPublicFields)
+  return isOrder(publicOrder) ? publicOrder : null
+}
+
+export const normalizeOrderTrade = (item: unknown): OrderTrade | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  if (!normalizeNumericFields(result, orderTradeRequiredNumericFields, orderTradeOptionalNumericFields)) {
+    return null
+  }
+
+  const publicTrade = pickFields(result, orderTradePublicFields)
+  return isOrderTrade(publicTrade) ? publicTrade : null
 }
 
 export const normalizeUserProfile = (data: unknown): UserProfile | null => {

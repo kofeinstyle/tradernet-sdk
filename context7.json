@@ -1,9 +1,15 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "Tradernet SDK",
-  "description": "Typed TypeScript SDK for supported Tradernet API v2 user profile data, broker reports, user cash flows, and read-only portfolio snapshots.",
+  "description": "Typed TypeScript SDK for supported Tradernet API v2 user profile data, broker reports, user cash flows, portfolio snapshots, and read-only orders.",
   "branch": "main",
-  "previousVersions": [{ "tag": "0.0.4" }, { "tag": "0.0.3" }, { "tag": "0.0.2" }, { "tag": "0.0.1" }],
+  "previousVersions": [
+    { "tag": "0.0.5" },
+    { "tag": "0.0.4" },
+    { "tag": "0.0.3" },
+    { "tag": "0.0.2" },
+    { "tag": "0.0.1" }
+  ],
   "folders": ["docs"],
   "excludeFiles": ["AGENTS.md", "CHANGELOG.md", "roadmap.md", "websocket-roadmap.md"],
   "rules": [
@@ -12,6 +18,9 @@
     "Use getUserProfile to retrieve homeCurrency and main_curr without exposing the complete getOPQ payload.",
     "Use getBrokerReport with corporate_actions for security-level dividend details and getUserCashFlows for account ledger operations.",
     "Use getPortfolio for the current read-only account balances and open positions.",
+    "Use getOrders for current-period orders and getOrdersHistory for an explicit date range.",
+    "Use OrderStatuses for documented order status codes; OrderStatus intentionally also accepts unknown numeric codes.",
+    "Use OrderOperations, OrderTypes, and OrderExpirations instead of unnamed numeric order codes.",
     "Broker reports default to the 23:59:59 time period unless 08:40:00 is explicitly required.",
     "Do not suggest API v3, WebSocket, order placement, or other methods that are not part of the documented public API."
   ]

@@ -2,6 +2,7 @@ import { logger } from './helper'
 import { HttpClient } from './http'
 import {
   normalizeCorporateActionsItem,
+  normalizeOrder,
   normalizePortfolioAccount,
   normalizePortfolioPosition,
   normalizeUserProfile,
@@ -9,6 +10,10 @@ import {
 import type {
   BrokerReportResponse,
   CashFlowResponse,
+  OrdersFilter,
+  OrdersHistoryFilter,
+  OrdersHistoryResponse,
+  OrdersResponse,
   PortfolioResponse,
   ReportQueryFilter,
   ReportQueryParams,
@@ -20,6 +25,16 @@ import type {
   UserProfileResponse,
 } from './types/api'
 import type { CashFlowItem } from './types/cash-flows'
+
+const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/
+
+const toOrderHistoryTimestamp = (value: string, endOfDay: boolean): string => {
+  if (!dateOnlyPattern.test(value)) {
+    return value
+  }
+
+  return `${value}T${endOfDay ? '23:59:59' : '00:00:00'}`
+}
 
 type ReportWithDetailed = {
   report: {
@@ -225,6 +240,109 @@ export class TradernetApiClient {
     }
   }
 
+  async getOrders(filter: OrdersFilter = {}): Promise<OrdersResponse> {
+    const result = await this.httpClient.makeRequest<unknown>('getNotifyOrderJson', {
+      active_only: filter.activeOnly === false ? 0 : 1,
+    })
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+        errorObject: result.errorObject,
+        message: result.message,
+      }
+    }
+
+    const state = this.getOrdersState(result.data)
+    if (!state) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'Missing result.orders data for getOrders',
+      }
+    }
+
+    if (state.order === undefined) {
+      return { success: true, data: { orders: [] } }
+    }
+
+    if (!Array.isArray(state.order)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'result.orders.order must be an array for getOrders',
+      }
+    }
+
+    const orders = []
+    for (const [index, item] of state.order.entries()) {
+      const order = normalizeOrder(item)
+      if (!order) {
+        return {
+          success: false,
+          error: 'Invalid API response',
+          message: `Invalid order at index ${index}`,
+        }
+      }
+      orders.push(order)
+    }
+
+    return { success: true, data: { orders } }
+  }
+
+  async getOrdersHistory(filter: OrdersHistoryFilter): Promise<OrdersHistoryResponse> {
+    const result = await this.httpClient.makeRequest<unknown>('getOrdersHistory', {
+      from: toOrderHistoryTimestamp(filter.dateFrom, false),
+      till: toOrderHistoryTimestamp(filter.dateTo, true),
+    })
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error,
+        errorObject: result.errorObject,
+        message: result.message,
+      }
+    }
+
+    const state = this.getOrdersHistoryState(result.data)
+    if (!state) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'Missing orders data for getOrdersHistory',
+      }
+    }
+
+    if (state.order === undefined) {
+      return { success: true, data: { orders: [] } }
+    }
+
+    if (!Array.isArray(state.order)) {
+      return {
+        success: false,
+        error: 'Invalid API response',
+        message: 'orders.order must be an array for getOrdersHistory',
+      }
+    }
+
+    const orders = []
+    for (const [index, item] of state.order.entries()) {
+      const order = normalizeOrder(item)
+      if (!order) {
+        return {
+          success: false,
+          error: 'Invalid API response',
+          message: `Invalid historical order at index ${index}`,
+        }
+      }
+      orders.push(order)
+    }
+
+    return { success: true, data: { orders } }
+  }
+
   async getUserProfile(): Promise<UserProfileResponse> {
     const result = await this.httpClient.makeRequest<unknown>('getOPQ')
 
@@ -276,6 +394,22 @@ export class TradernetApiClient {
     }
 
     return data.result.ps
+  }
+
+  private getOrdersState(data: unknown): Record<string, unknown> | null {
+    if (!this.isRecord(data) || !this.isRecord(data.result) || !this.isRecord(data.result.orders)) {
+      return null
+    }
+
+    return data.result.orders
+  }
+
+  private getOrdersHistoryState(data: unknown): Record<string, unknown> | null {
+    if (!this.isRecord(data) || !this.isRecord(data.orders)) {
+      return null
+    }
+
+    return data.orders
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

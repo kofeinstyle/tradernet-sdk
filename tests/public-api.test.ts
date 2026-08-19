@@ -1,14 +1,30 @@
+import { OrderExpirations, OrderOperations, OrderStatuses, OrderTypes } from '../src'
 import type {
   ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
+  BinaryFlag,
   BrokerReportResponse,
   CashFlowItem,
   CorporateActionTypesValue,
   FiatCurrency,
   KnownCorporateActionType,
   KnownFiatCurrency,
+  KnownOrderExpiration,
+  KnownOrderOperation,
+  KnownOrderStatus,
+  KnownOrderType,
   KnownTransactionTypeCode,
+  Order,
+  OrderExpiration,
+  OrderOperation,
+  OrderStatus,
+  OrderTrade,
+  OrderType,
+  OrdersFilter,
+  OrdersHistoryFilter,
+  OrdersHistoryResponse,
+  OrdersResponse,
   PortfolioAccount,
   PortfolioPosition,
   PortfolioResponse,
@@ -85,6 +101,29 @@ describe('Public API types', () => {
     expect([knownTypeCode, item.type_code]).toEqual(['dividend', 'custom_type_code'])
   })
 
+  it('supports known and API-provided order statuses', () => {
+    const knownStatus: KnownOrderStatus = OrderStatuses.EXECUTED
+    const apiStatus: OrderStatus = 999
+
+    expect(knownStatus).toBe(21)
+    expect(apiStatus).toBe(999)
+  })
+
+  it('supports typed order operation, type, expiration, and binary flags', () => {
+    const knownOperation: KnownOrderOperation = OrderOperations.BUY
+    const apiOperation: OrderOperation = 999
+    const knownType: KnownOrderType = OrderTypes.LIMIT
+    const apiType: OrderType = 999
+    const knownExpiration: KnownOrderExpiration = OrderExpirations.GOOD_TILL_CANCELED
+    const apiExpiration: OrderExpiration = 999
+    const allOrNone: BinaryFlag = 1
+
+    expect([knownOperation, apiOperation]).toEqual([1, 999])
+    expect([knownType, apiType]).toEqual([2, 999])
+    expect([knownExpiration, apiExpiration]).toEqual([3, 999])
+    expect(allOrNone).toBe(1)
+  })
+
   it('narrows API responses by success', () => {
     const success: ApiSuccessResponse<number> = { success: true, data: 42 }
     const failure: ApiErrorResponse = { success: false, error: 'Request failed' }
@@ -135,6 +174,40 @@ describe('Public API types', () => {
 
     expect(response.data?.accounts).toEqual([account])
     expect(response.data?.positions).toEqual([position])
+  })
+
+  it('exports order types', () => {
+    const filter: OrdersFilter = { activeOnly: true }
+    const historyFilter: OrdersHistoryFilter = { dateFrom: '2026-01-01', dateTo: '2026-01-31' }
+    const trade: OrderTrade = {
+      id: 2,
+      p: 190.4,
+      q: 5,
+      v: 952,
+      date: '2026-01-15T14:30:00.250',
+    }
+    const order: Order = {
+      id: 1,
+      date: '2026-08-19T14:30:00.000',
+      stat: OrderStatuses.CANCEL_PENDING,
+      instr: 'AAPL.US',
+      oper: OrderOperations.BUY,
+      type: OrderTypes.LIMIT,
+      cur: 'USD',
+      p: 190.5,
+      q: 5,
+      leaves_qty: 3,
+      aon: 0,
+      exp: OrderExpirations.GOOD_TILL_CANCELED,
+      trade: [trade],
+    }
+    const response: OrdersResponse = { success: true, data: { orders: [order] } }
+    const historyResponse: OrdersHistoryResponse = response
+
+    expect(filter.activeOnly).toBe(true)
+    expect(historyFilter.dateFrom).toBe('2026-01-01')
+    expect(response.data?.orders).toEqual([order])
+    expect(historyResponse.data?.orders[0].trade).toEqual([trade])
   })
 
   it('exports user profile types', () => {

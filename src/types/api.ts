@@ -1,10 +1,17 @@
 import type { CorporateActionsItem, TradeItem } from './broker-reports'
 import type { CashFlowItem } from './cash-flows'
 import type { FilterOperator } from './common'
+import type { OrdersSnapshot } from './orders'
 import type { PortfolioSnapshot } from './portfolio'
 import type { UserProfile } from './user-profile'
 
-export type ApiCommand = 'getBrokerReport' | 'getUserCashFlows' | 'getPositionJson' | 'getOPQ'
+export type ApiCommand =
+  | 'getBrokerReport'
+  | 'getUserCashFlows'
+  | 'getPositionJson'
+  | 'getNotifyOrderJson'
+  | 'getOrdersHistory'
+  | 'getOPQ'
 
 export interface TradernetConfig {
   apiKey: string
@@ -79,6 +86,24 @@ export type UserCashFlowsParams = {
   sort?: UserCashFlowsParamsSort[] | null
 }
 
+export type OrdersFilter = {
+  activeOnly?: boolean
+}
+
+export type OrdersParams = {
+  active_only: 0 | 1
+}
+
+export type OrdersHistoryFilter = {
+  dateFrom: string
+  dateTo: string
+}
+
+export type OrdersHistoryParams = {
+  from: string
+  till: string
+}
+
 export type ReportQueryFilter = {
   dateFrom: string
   dateTo: string
@@ -132,4 +157,6 @@ export type ReportQueryResult<T extends ReportQueryType> = ReportQueryResultMap[
 export type BrokerReportResponse<T extends ReportQueryType> = ApiResponse<ReportQueryResult<T>>
 export type UserCashFlowResponse = ApiResponse<CashFlowResponse>
 export type PortfolioResponse = ApiResponse<PortfolioSnapshot>
+export type OrdersResponse = ApiResponse<OrdersSnapshot>
+export type OrdersHistoryResponse = ApiResponse<OrdersSnapshot>
 export type UserProfileResponse = ApiResponse<UserProfile>
