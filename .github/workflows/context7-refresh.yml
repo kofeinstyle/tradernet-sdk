@@ -29,7 +29,7 @@ jobs:
               --request POST https://context7.com/api/v1/refresh \
               --header 'Content-Type: application/json' \
               --header 'Authorization: Bearer ${{ secrets.CONTEXT7_API_KEY }}' \
-              --data '{"libraryName": "/${{ github.repository }}", "branch": "main"}')"
+              --data '{"libraryName": "/${{ github.repository }}"}')"
             body="$(cat "$response_file")"
 
             if [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
