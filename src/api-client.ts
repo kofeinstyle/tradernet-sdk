@@ -24,6 +24,7 @@ import type {
   UserCashFlowsParams,
   UserProfileResponse,
 } from './types/api'
+import type { AccountAtEndReport } from './types/broker-reports'
 import type { CashFlowItem } from './types/cash-flows'
 
 const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/
@@ -72,6 +73,21 @@ export class TradernetApiClient {
         error: result.error,
         errorObject: result.errorObject,
         message: result.message,
+      }
+    }
+
+    if (type === 'account_at_end') {
+      if (!this.hasAccountAtEndReport(result.data)) {
+        return {
+          success: false,
+          error: 'Invalid API response',
+          message: 'Missing report.account data for account_at_end report',
+        }
+      }
+
+      return {
+        success: true,
+        data: result.data,
       }
     }
 
@@ -382,6 +398,25 @@ export class TradernetApiClient {
       'detailed' in data.report &&
       Array.isArray(data.report.detailed)
     )
+  }
+
+  private hasAccountAtEndReport(data: unknown): data is AccountAtEndReport {
+    if (!this.isRecord(data) || !this.isRecord(data.report) || !this.isRecord(data.report.account)) {
+      return false
+    }
+
+    const { account, date } = data.report
+    if (
+      typeof date !== 'string' ||
+      typeof account.net_assets !== 'number' ||
+      !this.isRecord(account.positions_from_ts) ||
+      !this.isRecord(account.positions_from_ts.ps)
+    ) {
+      return false
+    }
+
+    const { acc, pos } = account.positions_from_ts.ps
+    return Array.isArray(acc) && Array.isArray(pos) && this.hasObjectItems(acc) && this.hasObjectItems(pos)
   }
 
   private hasObjectItems(items: unknown[]): items is Record<string, unknown>[] {

@@ -51,7 +51,6 @@ export type {
   SortDescriptor,
   SortDirection,
   CashTotal,
-  AccountAtEndItem,
   CommissionItem,
   CashFlowReportItem,
   SecuritiesFlowItem,
@@ -62,7 +61,13 @@ export type {
 
 export type { BinaryFlag, FiatCurrency, KnownFiatCurrency, FilterOperator } from './types/common'
 
-export type { TradeItem, CorporateActionsItem } from './types/broker-reports'
+export type {
+  AccountAtEndPortfolioAccount,
+  AccountAtEndPortfolioPosition,
+  AccountAtEndReport,
+  CorporateActionsItem,
+  TradeItem,
+} from './types/broker-reports'
 export type { CashFlowItem, KnownTransactionTypeCode, TransactionTypeCode } from './types/cash-flows'
 export type { Order, OrderTrade, OrdersSnapshot } from './types/orders'
 export type { PortfolioAccount, PortfolioPosition, PortfolioSnapshot } from './types/portfolio'

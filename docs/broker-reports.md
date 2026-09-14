@@ -17,18 +17,38 @@ Dates use `YYYY-MM-DD`. The default report cut-off is `23:59:59`; pass `timePeri
 
 ## Report Types
 
-The `type` argument controls the item type returned in `report.detailed`.
+The `type` argument controls the report structure and item type.
 
-| Value               | Detailed item type     |
-| ------------------- | ---------------------- |
-| `trades`            | `TradeItem`            |
-| `corporate_actions` | `CorporateActionsItem` |
-| `account_at_end`    | `AccountAtEndItem`     |
-| `commissions`       | `CommissionItem`       |
-| `cash_flows`        | `CashFlowReportItem`   |
-| `securities_flows`  | `SecuritiesFlowItem`   |
+| Value               | Result structure / item type                                 |
+| ------------------- | ------------------------------------------------------------ |
+| `trades`            | `report.detailed: TradeItem[]`                               |
+| `corporate_actions` | `report.detailed: CorporateActionsItem[]`                    |
+| `account_at_end`    | `AccountAtEndReport` with `report.account.positions_from_ts` |
+| `commissions`       | `report.detailed: CommissionItem[]`                          |
+| `cash_flows`        | `report.detailed: CashFlowReportItem[]`                      |
+| `securities_flows`  | `report.detailed: SecuritiesFlowItem[]`                      |
 
-`TradeItem` and `CorporateActionsItem` have endpoint-specific fields. The remaining report item types are currently generic records because their full response contracts have not been stabilized.
+`TradeItem`, `CorporateActionsItem`, and `AccountAtEndReport` have endpoint-specific fields. Commission, cash-flow, and securities-flow items remain generic records until their response contracts are stabilized.
+
+## Account at End
+
+`account_at_end` returns a historical portfolio snapshot and does not contain `report.detailed`.
+
+```ts
+const result = await tradernet.getBrokerReport({ dateFrom: '2025-12-01', dateTo: '2025-12-31' }, 'account_at_end')
+
+if (!result.success) {
+  throw new Error(result.message ?? result.error)
+}
+
+const { account, date } = result.data.report
+const { acc, pos } = account.positions_from_ts.ps
+console.log(date, account.net_assets, acc, pos)
+```
+
+For historical snapshots, use `position.posval` as the position value; it is expected to equal `q * mkt_price`. Tradernet may return current quote values in `market_value` and `close_price`, even when the requested report date is in the past. The SDK preserves those fields unchanged.
+
+A useful integrity check is `sum(pos[].posval) + sum(acc[].s) === account.net_assets`, allowing for normal floating-point rounding.
 
 ## Trades
 

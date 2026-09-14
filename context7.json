@@ -4,6 +4,7 @@
   "description": "Typed TypeScript SDK for supported Tradernet API v2 user profile data, broker reports, user cash flows, portfolio snapshots, and read-only orders.",
   "branch": "main",
   "previousVersions": [
+    { "tag": "0.0.6" },
     { "tag": "0.0.5" },
     { "tag": "0.0.4" },
     { "tag": "0.0.3" },
@@ -17,6 +18,8 @@
     "Check response.success before accessing response.data or error fields.",
     "Use getUserProfile to retrieve homeCurrency and main_curr without exposing the complete getOPQ payload.",
     "Use getBrokerReport with corporate_actions for security-level dividend details and getUserCashFlows for account ledger operations.",
+    "For account_at_end reports, read the snapshot from report.account.positions_from_ts.ps; there is no report.detailed array.",
+    "For historical account_at_end position values, use posval (q * mkt_price), not market_value or close_price, which may contain current quote data.",
     "Use getPortfolio for the current read-only account balances and open positions.",
     "Use getOrders for current-period orders and getOrdersHistory for an explicit date range.",
     "Use OrderStatuses for documented order status codes; OrderStatus intentionally also accepts unknown numeric codes.",

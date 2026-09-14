@@ -126,6 +126,81 @@ describe('getBrokerReport', () => {
     expect(result.data).toBeUndefined()
   })
 
+  it('gets an account-at-end report without report.detailed', async () => {
+    const accountAtEnd = {
+      report: {
+        date: '2025-12-31 23:59:59',
+        account: {
+          net_assets: 68507.8,
+          positions_from_ts: {
+            ps: {
+              acc: [
+                {
+                  curr: 'USD',
+                  currval: 1,
+                  forecast_in: 0,
+                  forecast_out: 0,
+                  s: 500,
+                },
+              ],
+              pos: [
+                {
+                  acc_pos_id: 1,
+                  curr: 'USD',
+                  currval: 1,
+                  i: 'ABNB.US',
+                  market_value: 1700.8,
+                  mkt_price: 135.72,
+                  posval: 1357.2,
+                  q: 10,
+                },
+              ],
+            },
+          },
+          repo_positions: {},
+        },
+      },
+    }
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => accountAtEnd,
+    })
+
+    const result = await client.getBrokerReport(
+      { dateFrom: '2025-12-01', dateTo: '2025-12-31', timePeriod: '23:59:59' },
+      'account_at_end'
+    )
+
+    expect(result.success).toBe(true)
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+    expect(result.data).toEqual(accountAtEnd)
+    expect(result.data.report.date).toBe('2025-12-31 23:59:59')
+    expect(result.data.report.account.positions_from_ts.ps.pos[0].posval).toBe(1357.2)
+  })
+
+  it('rejects an account-at-end report without a positions array', async () => {
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        report: {
+          date: '2025-12-31 23:59:59',
+          account: {
+            net_assets: 68507.8,
+            positions_from_ts: { ps: { acc: [] } },
+          },
+        },
+      }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'account_at_end')
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('Invalid API response')
+    expect(result.message).toBe('Missing report.account data for account_at_end report')
+  })
+
   it('gets a complete corporate actions report', async () => {
     const item = makeCorporateActionsItem({ tax_amount: '-', tax_currency: '' })
     ;(fetch as jest.Mock).mockResolvedValueOnce({

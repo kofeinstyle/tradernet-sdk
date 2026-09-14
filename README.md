@@ -76,6 +76,19 @@ if (result.success) {
 }
 ```
 
+`account_at_end` returns a historical portfolio snapshot under `report.account`, not `report.detailed`:
+
+```ts
+const result = await client.getBrokerReport({ dateFrom: '2025-12-01', dateTo: '2025-12-31' }, 'account_at_end')
+
+if (result.success) {
+  const snapshot = result.data.report.account.positions_from_ts.ps
+  console.log(result.data.report.account.net_assets, snapshot.acc, snapshot.pos)
+}
+```
+
+For historical position value, use `posval` (`q * mkt_price`). Tradernet may fill `market_value` and `close_price` with current quote data even for past report dates.
+
 ### Dividends from corporate actions
 
 Corporate actions contain broker-report dividend records, including tax and ex-date fields.

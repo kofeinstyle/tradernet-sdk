@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.6 - 2026-09-14
+
+- Fix `account_at_end` broker reports by validating their actual `report.account` structure instead of requiring `report.detailed`.
+- Add typed account-at-end snapshots using the existing portfolio account and position contracts.
+- Document `posval` as the historical position value while preserving Tradernet's current-quote fields unchanged.
+
 ## 0.0.5 - 2026-08-19
 
 - Add a typed, read-only `getOrders()` method with an `activeOnly` filter.

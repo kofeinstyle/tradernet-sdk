@@ -1,5 +1,8 @@
 import { OrderExpirations, OrderOperations, OrderStatuses, OrderTypes } from '../src'
 import type {
+  AccountAtEndPortfolioAccount,
+  AccountAtEndPortfolioPosition,
+  AccountAtEndReport,
   ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
@@ -49,7 +52,9 @@ const unwrapResponse = (response: ApiResponse<number>): number | string => {
   return response.error
 }
 
-const getDetailedReport = <T extends ReportQueryType>(response: BrokerReportResponse<T>) => {
+type DetailedReportQueryType = Exclude<ReportQueryType, 'account_at_end'>
+
+const getDetailedReport = <T extends DetailedReportQueryType>(response: BrokerReportResponse<T>) => {
   if (!response.success) {
     throw new Error(response.error)
   }
@@ -148,6 +153,38 @@ describe('Public API types', () => {
     }
 
     expect(getDetailedReport(response)).toEqual([])
+  })
+
+  it('exports the account-at-end report structure', () => {
+    const account = {
+      curr: 'USD',
+      currval: 1,
+      forecast_in: 0,
+      forecast_out: 0,
+      s: 500,
+    } satisfies AccountAtEndPortfolioAccount
+    const position = {
+      acc_pos_id: 1,
+      curr: 'USD',
+      currval: 1,
+      i: 'ABNB.US',
+      market_value: 1700.8,
+      mkt_price: 135.72,
+      posval: 1357.2,
+      q: 10,
+    } satisfies AccountAtEndPortfolioPosition
+    const report: AccountAtEndReport = {
+      report: {
+        date: '2025-12-31 23:59:59',
+        account: {
+          net_assets: 1857.2,
+          positions_from_ts: { ps: { acc: [account], pos: [position] } },
+        },
+      },
+    }
+    const response: BrokerReportResponse<'account_at_end'> = { success: true, data: report }
+
+    expect(response.data?.report.account.positions_from_ts.ps.pos).toEqual([position])
   })
 
   it('exports portfolio snapshot types', () => {

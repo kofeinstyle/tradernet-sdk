@@ -1,4 +1,4 @@
-import type { CorporateActionsItem, TradeItem } from './broker-reports'
+import type { AccountAtEndReport, CorporateActionsItem, TradeItem } from './broker-reports'
 import type { CashFlowItem } from './cash-flows'
 import type { FilterOperator } from './common'
 import type { OrdersSnapshot } from './orders'
@@ -115,7 +115,6 @@ export type CashTotal = UnknownRecord
 export type ReportProjectedTotal = UnknownRecord
 export type ReportTotal = Record<string, number>
 export type UntypedReportItem = UnknownRecord
-export type AccountAtEndItem = UntypedReportItem
 export type CommissionItem = UntypedReportItem
 export type CashFlowReportItem = UntypedReportItem
 export type SecuritiesFlowItem = UntypedReportItem
@@ -146,7 +145,7 @@ export type ReportResponseShort<T> = {
 type ReportQueryResultMap = {
   trades: ReportResponse<TradeItem>
   corporate_actions: ReportResponseShort<CorporateActionsItem>
-  account_at_end: ReportResponse<AccountAtEndItem>
+  account_at_end: AccountAtEndReport
   commissions: ReportResponse<CommissionItem>
   cash_flows: ReportResponse<CashFlowReportItem>
   securities_flows: ReportResponse<SecuritiesFlowItem>
