@@ -1,5 +1,5 @@
 import type { CorporateActionTypesValue, InstrumentValue, TradeOperationValue } from '../enums'
-import type { FiatCurrency } from './common'
+import type { FiatCurrency, OpenString } from './common'
 import type { PortfolioAccount, PortfolioPosition } from './portfolio'
 
 export type TradeItem = {
@@ -75,7 +75,7 @@ export type AccountAtEndPortfolioPosition = PortfolioPosition & {
   mkt_price_updated_from_quotes?: boolean | number | null
 }
 
-export type AccountAtEndReport = {
+export type AccountSnapshotReport = {
   report: {
     date: string
     account: {
@@ -90,3 +90,52 @@ export type AccountAtEndReport = {
     }
   }
 }
+
+export type AccountAtStartReport = AccountSnapshotReport
+export type AccountAtEndReport = AccountSnapshotReport
+
+export type CashFlowReportItem = {
+  date_start: string
+  date_end: string
+  curr: FiatCurrency
+  curr_at_start: number
+  curr_traded: number
+  curr_commissioned: string
+  curr_flowed: string
+  curr_at_end: number
+}
+
+export type SecuritiesFlowItem = {
+  date_start: string
+  date_end: string
+  ticker: string
+  isin: string
+  quantity_at_start: number
+  securities_traded: number
+  securities_flowed: number
+  quantity_at_end: number
+  security_price_at_start: number
+  security_price: number
+  security_currency: FiatCurrency
+  position_value: number
+  mkt_id: string
+  instr_type: number
+  instr_kind: number
+}
+
+export type KnownInOutType = 'bank' | 'card' | 'dividend' | 'tax' | 'dividend_reverted' | 'tax_reverted'
+export type InOutType = OpenString<KnownInOutType>
+
+export type InOutItem = {
+  date: string
+  account: string
+  account_id: number | null
+  sum: string
+  amount: number
+  currency: FiatCurrency
+  type: string
+  type_id: InOutType
+  comment: string
+}
+
+export type InOutSecuritiesItem = Record<string, unknown>

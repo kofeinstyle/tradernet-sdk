@@ -32,7 +32,13 @@ getBrokerReport<T extends ReportQueryType>(
 
 `ReportQueryFilter` contains `dateFrom`, `dateTo`, and optional `timePeriod`. The default time period is `23:59:59`.
 
-The return type is selected by `type`. `account_at_end` returns `AccountAtEndReport` under `report.account`; the other report types currently return `report.detailed` arrays. For historical account snapshots, use `posval` instead of `market_value` as the value at the requested date.
+The return type is selected by `type`:
+
+- `account_at_start` and `account_at_end` return an `AccountSnapshotReport` under `report.account`.
+- `cash_flows` and `securities_flows` return `IndexedReportResponse<T>`; read rows with `Object.values(data.report)`.
+- The remaining report types return `report.detailed` arrays.
+
+For historical account snapshots, use `posval` instead of `market_value` as the value at the requested date.
 
 ### getUserCashFlows
 
@@ -161,21 +167,21 @@ OrderExpirations.GOOD_TILL_CANCELED // 3
 
 ## Main Public Types
 
-| Group          | Exported types                                                                                                                                                                           |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Client         | `TradernetConfig`                                                                                                                                                                        |
-| Responses      | `ApiResponse`, `ApiSuccessResponse`, `ApiErrorResponse`, `CashFlowResponse`, `OrdersResponse`, `OrdersHistoryResponse`, `PortfolioResponse`, `UserProfileResponse`                       |
-| Broker reports | `BrokerReportResponse`, `ReportQueryFilter`, `ReportQueryResult`, `ReportQueryType`, `ReportTimePeriod`, `ReportResponse`, `ReportResponseShort`                                         |
-| Report items   | `TradeItem`, `CorporateActionsItem`, `AccountAtEndReport`, `AccountAtEndPortfolioAccount`, `AccountAtEndPortfolioPosition`, `CommissionItem`, `CashFlowReportItem`, `SecuritiesFlowItem` |
-| Cash flows     | `UserCashFlowResponse`, `UserCashFlowsParams`, `UserCashFlowsParamsFilter`, `UserCashFlowsParamsSort`, `UserCashFlowsField`, `CashFlowItem`                                              |
-| Portfolio      | `PortfolioSnapshot`, `PortfolioAccount`, `PortfolioPosition`                                                                                                                             |
-| Orders         | `OrdersFilter`, `OrdersHistoryFilter`, `OrdersSnapshot`, `Order`, `OrderTrade`                                                                                                           |
-| User profile   | `UserProfile`                                                                                                                                                                            |
-| Sorting        | `SortDescriptor`, `SortDirection`, `FilterOperator`                                                                                                                                      |
-| Totals         | `CashTotal`, `ReportTotal`, `ReportProjectedTotal`                                                                                                                                       |
-| Open values    | `FiatCurrency`, `TransactionTypeCode`, `CorporateActionTypesValue`, `TradeOperationValue`, `InstrumentValue`, `OrderStatus`, `OrderOperation`, `OrderType`, `OrderExpiration`            |
-| Known values   | `KnownFiatCurrency`, `KnownTransactionTypeCode`, `KnownCorporateActionType`, `KnownOrderStatus`, `KnownOrderOperation`, `KnownOrderType`, `KnownOrderExpiration`                         |
-| Flags          | `BinaryFlag`                                                                                                                                                                             |
+| Group          | Exported types                                                                                                                                                                                                                                                                |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Client         | `TradernetConfig`                                                                                                                                                                                                                                                             |
+| Responses      | `ApiResponse`, `ApiSuccessResponse`, `ApiErrorResponse`, `CashFlowResponse`, `OrdersResponse`, `OrdersHistoryResponse`, `PortfolioResponse`, `UserProfileResponse`                                                                                                            |
+| Broker reports | `BrokerReportResponse`, `ReportQueryFilter`, `ReportQueryResult`, `ReportQueryType`, `AccountSnapshotReportQueryType`, `IndexedReportQueryType`, `DetailedReportQueryType`, `ReportTimePeriod`, `ReportResponse`, `ReportResponseShort`, `IndexedReportResponse`              |
+| Report items   | `TradeItem`, `CorporateActionsItem`, `AccountSnapshotReport`, `AccountAtStartReport`, `AccountAtEndReport`, `AccountAtEndPortfolioAccount`, `AccountAtEndPortfolioPosition`, `CommissionItem`, `CashFlowReportItem`, `SecuritiesFlowItem`, `InOutItem`, `InOutSecuritiesItem` |
+| Cash flows     | `UserCashFlowResponse`, `UserCashFlowsParams`, `UserCashFlowsParamsFilter`, `UserCashFlowsParamsSort`, `UserCashFlowsField`, `CashFlowItem`                                                                                                                                   |
+| Portfolio      | `PortfolioSnapshot`, `PortfolioAccount`, `PortfolioPosition`                                                                                                                                                                                                                  |
+| Orders         | `OrdersFilter`, `OrdersHistoryFilter`, `OrdersSnapshot`, `Order`, `OrderTrade`                                                                                                                                                                                                |
+| User profile   | `UserProfile`                                                                                                                                                                                                                                                                 |
+| Sorting        | `SortDescriptor`, `SortDirection`, `FilterOperator`                                                                                                                                                                                                                           |
+| Totals         | `CashTotal`, `ReportTotal`, `ReportProjectedTotal`                                                                                                                                                                                                                            |
+| Open values    | `FiatCurrency`, `TransactionTypeCode`, `CorporateActionTypesValue`, `TradeOperationValue`, `InstrumentValue`, `OrderStatus`, `OrderOperation`, `OrderType`, `OrderExpiration`                                                                                                 |
+| Known values   | `KnownFiatCurrency`, `KnownTransactionTypeCode`, `KnownCorporateActionType`, `KnownOrderStatus`, `KnownOrderOperation`, `KnownOrderType`, `KnownOrderExpiration`                                                                                                              |
+| Flags          | `BinaryFlag`                                                                                                                                                                                                                                                                  |
 
 ## Open String Values
 

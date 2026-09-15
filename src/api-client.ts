@@ -24,7 +24,7 @@ import type {
   UserCashFlowsParams,
   UserProfileResponse,
 } from './types/api'
-import type { AccountAtEndReport } from './types/broker-reports'
+import type { AccountSnapshotReport } from './types/broker-reports'
 import type { CashFlowItem } from './types/cash-flows'
 
 const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/
@@ -76,12 +76,27 @@ export class TradernetApiClient {
       }
     }
 
-    if (type === 'account_at_end') {
-      if (!this.hasAccountAtEndReport(result.data)) {
+    if (type === 'account_at_start' || type === 'account_at_end') {
+      if (!this.hasAccountSnapshotReport(result.data)) {
         return {
           success: false,
           error: 'Invalid API response',
-          message: 'Missing report.account data for account_at_end report',
+          message: `Missing report.account data for ${type} report`,
+        }
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      }
+    }
+
+    if (type === 'cash_flows' || type === 'securities_flows') {
+      if (!this.hasIndexedReport(result.data)) {
+        return {
+          success: false,
+          error: 'Invalid API response',
+          message: `Missing indexed report data for ${type} report`,
         }
       }
 
@@ -400,7 +415,7 @@ export class TradernetApiClient {
     )
   }
 
-  private hasAccountAtEndReport(data: unknown): data is AccountAtEndReport {
+  private hasAccountSnapshotReport(data: unknown): data is AccountSnapshotReport {
     if (!this.isRecord(data) || !this.isRecord(data.report) || !this.isRecord(data.report.account)) {
       return false
     }
@@ -417,6 +432,14 @@ export class TradernetApiClient {
 
     const { acc, pos } = account.positions_from_ts.ps
     return Array.isArray(acc) && Array.isArray(pos) && this.hasObjectItems(acc) && this.hasObjectItems(pos)
+  }
+
+  private hasIndexedReport(data: unknown): data is { report: Record<string, Record<string, unknown>> } {
+    if (!this.isRecord(data) || !this.isRecord(data.report)) {
+      return false
+    }
+
+    return Object.entries(data.report).every(([key, item]) => /^\d+$/.test(key) && this.isRecord(item))
   }
 
   private hasObjectItems(items: unknown[]): items is Record<string, unknown>[] {

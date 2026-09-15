@@ -89,6 +89,8 @@ if (result.success) {
 
 For historical position value, use `posval` (`q * mkt_price`). Tradernet may fill `market_value` and `close_price` with current quote data even for past report dates.
 
+`account_at_start` uses the same account snapshot structure. The `cash_flows` and `securities_flows` report blocks are indexed objects rather than detailed arrays; read their rows with `Object.values(result.data.report)`.
+
 ### Dividends from corporate actions
 
 Corporate actions contain broker-report dividend records, including tax and ex-date fields.

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Support `account_at_start`, `in_outs`, and `in_outs_securities` broker report query types.
+- Accept and type the indexed response containers returned by `cash_flows` and `securities_flows` reports.
+- Expose typed cash-flow summaries, securities-flow summaries, and inbound/outbound cash records.
+- Include Tradernet's `totalTrading` commissions total in detailed report types.
+
 ## 0.0.6 - 2026-09-14
 
 - Fix `account_at_end` broker reports by validating their actual `report.account` structure instead of requiring `report.detailed`.

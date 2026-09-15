@@ -1,4 +1,13 @@
-import type { AccountAtEndReport, CorporateActionsItem, TradeItem } from './broker-reports'
+import type {
+  AccountAtEndReport,
+  AccountAtStartReport,
+  CashFlowReportItem,
+  CorporateActionsItem,
+  InOutItem,
+  InOutSecuritiesItem,
+  SecuritiesFlowItem,
+  TradeItem,
+} from './broker-reports'
 import type { CashFlowItem } from './cash-flows'
 import type { FilterOperator } from './common'
 import type { OrdersSnapshot } from './orders'
@@ -42,11 +51,18 @@ export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse
 
 export type ReportQueryType =
   | 'corporate_actions'
+  | 'account_at_start'
   | 'account_at_end'
   | 'commissions'
   | 'trades'
   | 'cash_flows'
   | 'securities_flows'
+  | 'in_outs'
+  | 'in_outs_securities'
+
+export type AccountSnapshotReportQueryType = 'account_at_start' | 'account_at_end'
+export type IndexedReportQueryType = 'cash_flows' | 'securities_flows'
+export type DetailedReportQueryType = Exclude<ReportQueryType, AccountSnapshotReportQueryType | IndexedReportQueryType>
 
 export type ReportTimePeriod = '23:59:59' | '08:40:00'
 
@@ -116,8 +132,6 @@ export type ReportProjectedTotal = UnknownRecord
 export type ReportTotal = Record<string, number>
 export type UntypedReportItem = UnknownRecord
 export type CommissionItem = UntypedReportItem
-export type CashFlowReportItem = UntypedReportItem
-export type SecuritiesFlowItem = UntypedReportItem
 
 export type CashFlowResponse = {
   total: number
@@ -132,6 +146,7 @@ export type ReportResponse<T> = {
     total: ReportTotal
     securities?: Record<string, number>
     prtotal?: ReportProjectedTotal[]
+    totalTrading?: ReportTotal
   }
 }
 
@@ -142,13 +157,20 @@ export type ReportResponseShort<T> = {
   }
 }
 
+export type IndexedReportResponse<T> = {
+  report: Record<string, T>
+}
+
 type ReportQueryResultMap = {
   trades: ReportResponse<TradeItem>
   corporate_actions: ReportResponseShort<CorporateActionsItem>
+  account_at_start: AccountAtStartReport
   account_at_end: AccountAtEndReport
   commissions: ReportResponse<CommissionItem>
-  cash_flows: ReportResponse<CashFlowReportItem>
-  securities_flows: ReportResponse<SecuritiesFlowItem>
+  cash_flows: IndexedReportResponse<CashFlowReportItem>
+  securities_flows: IndexedReportResponse<SecuritiesFlowItem>
+  in_outs: ReportResponse<InOutItem>
+  in_outs_securities: ReportResponse<InOutSecuritiesItem>
 }
 
 export type ReportQueryResult<T extends ReportQueryType> = ReportQueryResultMap[T]

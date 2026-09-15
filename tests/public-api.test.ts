@@ -9,8 +9,13 @@ import type {
   BinaryFlag,
   BrokerReportResponse,
   CashFlowItem,
+  CashFlowReportItem,
   CorporateActionTypesValue,
+  DetailedReportQueryType,
   FiatCurrency,
+  InOutItem,
+  InOutType,
+  IndexedReportResponse,
   KnownCorporateActionType,
   KnownFiatCurrency,
   KnownOrderExpiration,
@@ -31,7 +36,7 @@ import type {
   PortfolioAccount,
   PortfolioPosition,
   PortfolioResponse,
-  ReportQueryType,
+  SecuritiesFlowItem,
   SortDescriptor,
   SortDirection,
   TransactionTypeCode,
@@ -51,8 +56,6 @@ const unwrapResponse = (response: ApiResponse<number>): number | string => {
 
   return response.error
 }
-
-type DetailedReportQueryType = Exclude<ReportQueryType, 'account_at_end'>
 
 const getDetailedReport = <T extends DetailedReportQueryType>(response: BrokerReportResponse<T>) => {
   if (!response.success) {
@@ -185,6 +188,58 @@ describe('Public API types', () => {
     const response: BrokerReportResponse<'account_at_end'> = { success: true, data: report }
 
     expect(response.data?.report.account.positions_from_ts.ps.pos).toEqual([position])
+  })
+
+  it('exports indexed broker-report types', () => {
+    const cashFlow: CashFlowReportItem = {
+      date_start: '2022-01-01 23:59:59',
+      date_end: '2022-12-31 23:59:59',
+      curr: 'USD',
+      curr_at_start: 0,
+      curr_traded: -48000,
+      curr_commissioned: '500.00',
+      curr_flowed: '50000.00',
+      curr_at_end: 1500,
+    }
+    const securitiesFlow: SecuritiesFlowItem = {
+      date_start: '2022-01-01 23:59:59',
+      date_end: '2022-12-31 23:59:59',
+      ticker: 'C.US',
+      isin: 'US1729674242',
+      quantity_at_start: 0,
+      securities_traded: 20,
+      securities_flowed: 0,
+      quantity_at_end: 20,
+      security_price_at_start: 0,
+      security_price: 45.16,
+      security_currency: 'USD',
+      position_value: 903.2,
+      mkt_id: '30000000001',
+      instr_type: 1,
+      instr_kind: 1,
+    }
+    const response: IndexedReportResponse<CashFlowReportItem> = { report: { '0': cashFlow } }
+
+    expect(Object.values(response.report)).toEqual([cashFlow])
+    expect(securitiesFlow.position_value).toBe(903.2)
+  })
+
+  it('exports in-outs report types with open type identifiers', () => {
+    const knownType: InOutType = 'bank'
+    const unknownType: InOutType = 'future_transfer_type'
+    const item: InOutItem = {
+      date: '2022-08-01',
+      account: 'trading',
+      account_id: null,
+      sum: '3000 USD',
+      amount: 3000,
+      currency: 'USD',
+      type: 'Bank transfer',
+      type_id: knownType,
+      comment: 'Top up account',
+    }
+
+    expect([item.type_id, unknownType]).toEqual(['bank', 'future_transfer_type'])
   })
 
   it('exports portfolio snapshot types', () => {

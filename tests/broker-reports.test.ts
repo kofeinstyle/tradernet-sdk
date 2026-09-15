@@ -201,6 +201,113 @@ describe('getBrokerReport', () => {
     expect(result.message).toBe('Missing report.account data for account_at_end report')
   })
 
+  it('gets an account-at-start report through the account snapshot validation', async () => {
+    const accountAtStart = {
+      report: {
+        date: '2022-01-01 23:59:59',
+        account: {
+          net_assets: 0,
+          positions_from_ts: { ps: { acc: [], pos: [] } },
+          repo_positions: [],
+        },
+      },
+    }
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => accountAtStart,
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'account_at_start')
+
+    expect(result).toEqual({ success: true, data: accountAtStart })
+  })
+
+  it('gets an indexed cash-flows report and preserves mixed numeric fields', async () => {
+    const item = {
+      date_start: '2022-01-01 23:59:59',
+      date_end: '2022-12-31 23:59:59',
+      curr: 'USD',
+      curr_at_start: 0,
+      curr_traded: -48000,
+      curr_commissioned: '500.00',
+      curr_flowed: '50000.00',
+      curr_at_end: 1500,
+    }
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ report: { '0': item } }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'cash_flows')
+
+    expect(result.success).toBe(true)
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+    const [cashFlow] = Object.values(result.data.report)
+    expect(cashFlow).toEqual(item)
+    expect(
+      cashFlow.curr_at_start + Number(cashFlow.curr_flowed) - Number(cashFlow.curr_commissioned) + cashFlow.curr_traded
+    ).toBeCloseTo(cashFlow.curr_at_end, 2)
+  })
+
+  it('gets an indexed securities-flows report', async () => {
+    const item = {
+      date_start: '2022-01-01 23:59:59',
+      date_end: '2022-12-31 23:59:59',
+      ticker: 'C.US',
+      isin: 'US1729674242',
+      quantity_at_start: 0,
+      securities_traded: 20,
+      securities_flowed: 0,
+      quantity_at_end: 20,
+      security_price_at_start: 0,
+      security_price: 45.16,
+      security_currency: 'USD',
+      position_value: 903.2,
+      mkt_id: '30000000001',
+      instr_type: 1,
+      instr_kind: 1,
+    }
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ report: { '0': item } }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'securities_flows')
+
+    expect(result.success).toBe(true)
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+    expect(Object.values(result.data.report)).toEqual([item])
+  })
+
+  it.each(['cash_flows', 'securities_flows'] as const)('rejects a missing indexed report for %s', async type => {
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({}),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), type)
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('Invalid API response')
+    expect(result.message).toBe(`Missing indexed report data for ${type} report`)
+  })
+
+  it.each(['commissions', 'in_outs', 'in_outs_securities'] as const)('accepts detailed report type %s', async type => {
+    const report = { detailed: [], total: {}, totalTrading: {} }
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ report }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), type)
+
+    expect(result).toEqual({ success: true, data: { report } })
+  })
+
   it('gets a complete corporate actions report', async () => {
     const item = makeCorporateActionsItem({ tax_amount: '-', tax_currency: '' })
     ;(fetch as jest.Mock).mockResolvedValueOnce({
