@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.8 - 2026-09-15
+
+- Fix `cash_flows` and `securities_flows` broker reports to accept the arrays returned by Tradernet.
+- Replace the incorrect indexed-object response types with `ArrayReportResponse` and `ArrayReportQueryType`.
+- Correct broker-report tests, examples, and Context7 guidance to use `data.report` directly.
+
 ## 0.0.7 - 2026-09-15
 
 - Support `account_at_start`, `in_outs`, and `in_outs_securities` broker report query types.

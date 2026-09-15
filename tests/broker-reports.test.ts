@@ -235,7 +235,7 @@ describe('getBrokerReport', () => {
     }
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ report: { '0': item } }),
+      json: async () => ({ report: [item] }),
     })
 
     const result = await client.getBrokerReport(makeDateRange(), 'cash_flows')
@@ -244,7 +244,7 @@ describe('getBrokerReport', () => {
     if (!result.success) {
       throw new Error(result.message)
     }
-    const [cashFlow] = Object.values(result.data.report)
+    const [cashFlow] = result.data.report
     expect(cashFlow).toEqual(item)
     expect(
       cashFlow.curr_at_start + Number(cashFlow.curr_flowed) - Number(cashFlow.curr_commissioned) + cashFlow.curr_traded
@@ -271,7 +271,7 @@ describe('getBrokerReport', () => {
     }
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ report: { '0': item } }),
+      json: async () => ({ report: [item] }),
     })
 
     const result = await client.getBrokerReport(makeDateRange(), 'securities_flows')
@@ -280,10 +280,10 @@ describe('getBrokerReport', () => {
     if (!result.success) {
       throw new Error(result.message)
     }
-    expect(Object.values(result.data.report)).toEqual([item])
+    expect(result.data.report).toEqual([item])
   })
 
-  it.each(['cash_flows', 'securities_flows'] as const)('rejects a missing indexed report for %s', async type => {
+  it.each(['cash_flows', 'securities_flows'] as const)('rejects a missing report array for %s', async type => {
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
       json: async () => ({}),
@@ -293,7 +293,19 @@ describe('getBrokerReport', () => {
 
     expect(result.success).toBe(false)
     expect(result.error).toBe('Invalid API response')
-    expect(result.message).toBe(`Missing indexed report data for ${type} report`)
+    expect(result.message).toBe(`Missing report array data for ${type} report`)
+  })
+
+  it('rejects the obsolete object-shaped cash-flows fixture', async () => {
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ report: { '0': {} } }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'cash_flows')
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Missing report array data for cash_flows report')
   })
 
   it.each(['commissions', 'in_outs', 'in_outs_securities'] as const)('accepts detailed report type %s', async type => {

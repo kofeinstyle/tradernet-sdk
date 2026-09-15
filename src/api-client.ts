@@ -92,11 +92,11 @@ export class TradernetApiClient {
     }
 
     if (type === 'cash_flows' || type === 'securities_flows') {
-      if (!this.hasIndexedReport(result.data)) {
+      if (!this.hasArrayReport(result.data)) {
         return {
           success: false,
           error: 'Invalid API response',
-          message: `Missing indexed report data for ${type} report`,
+          message: `Missing report array data for ${type} report`,
         }
       }
 
@@ -434,12 +434,12 @@ export class TradernetApiClient {
     return Array.isArray(acc) && Array.isArray(pos) && this.hasObjectItems(acc) && this.hasObjectItems(pos)
   }
 
-  private hasIndexedReport(data: unknown): data is { report: Record<string, Record<string, unknown>> } {
-    if (!this.isRecord(data) || !this.isRecord(data.report)) {
+  private hasArrayReport(data: unknown): data is { report: Record<string, unknown>[] } {
+    if (!this.isRecord(data) || !Array.isArray(data.report)) {
       return false
     }
 
-    return Object.entries(data.report).every(([key, item]) => /^\d+$/.test(key) && this.isRecord(item))
+    return this.hasObjectItems(data.report)
   }
 
   private hasObjectItems(items: unknown[]): items is Record<string, unknown>[] {

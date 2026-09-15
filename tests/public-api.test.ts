@@ -6,6 +6,7 @@ import type {
   ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
+  ArrayReportResponse,
   BinaryFlag,
   BrokerReportResponse,
   CashFlowItem,
@@ -15,7 +16,6 @@ import type {
   FiatCurrency,
   InOutItem,
   InOutType,
-  IndexedReportResponse,
   KnownCorporateActionType,
   KnownFiatCurrency,
   KnownOrderExpiration,
@@ -190,7 +190,7 @@ describe('Public API types', () => {
     expect(response.data?.report.account.positions_from_ts.ps.pos).toEqual([position])
   })
 
-  it('exports indexed broker-report types', () => {
+  it('exports array broker-report types', () => {
     const cashFlow: CashFlowReportItem = {
       date_start: '2022-01-01 23:59:59',
       date_end: '2022-12-31 23:59:59',
@@ -218,9 +218,9 @@ describe('Public API types', () => {
       instr_type: 1,
       instr_kind: 1,
     }
-    const response: IndexedReportResponse<CashFlowReportItem> = { report: { '0': cashFlow } }
+    const response: ArrayReportResponse<CashFlowReportItem> = { report: [cashFlow] }
 
-    expect(Object.values(response.report)).toEqual([cashFlow])
+    expect(response.report).toEqual([cashFlow])
     expect(securitiesFlow.position_value).toBe(903.2)
   })
 

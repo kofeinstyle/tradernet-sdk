@@ -35,7 +35,7 @@ getBrokerReport<T extends ReportQueryType>(
 The return type is selected by `type`:
 
 - `account_at_start` and `account_at_end` return an `AccountSnapshotReport` under `report.account`.
-- `cash_flows` and `securities_flows` return `IndexedReportResponse<T>`; read rows with `Object.values(data.report)`.
+- `cash_flows` and `securities_flows` return `ArrayReportResponse<T>` with rows directly in `data.report`.
 - The remaining report types return `report.detailed` arrays.
 
 For historical account snapshots, use `posval` instead of `market_value` as the value at the requested date.
@@ -171,7 +171,7 @@ OrderExpirations.GOOD_TILL_CANCELED // 3
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Client         | `TradernetConfig`                                                                                                                                                                                                                                                             |
 | Responses      | `ApiResponse`, `ApiSuccessResponse`, `ApiErrorResponse`, `CashFlowResponse`, `OrdersResponse`, `OrdersHistoryResponse`, `PortfolioResponse`, `UserProfileResponse`                                                                                                            |
-| Broker reports | `BrokerReportResponse`, `ReportQueryFilter`, `ReportQueryResult`, `ReportQueryType`, `AccountSnapshotReportQueryType`, `IndexedReportQueryType`, `DetailedReportQueryType`, `ReportTimePeriod`, `ReportResponse`, `ReportResponseShort`, `IndexedReportResponse`              |
+| Broker reports | `BrokerReportResponse`, `ReportQueryFilter`, `ReportQueryResult`, `ReportQueryType`, `AccountSnapshotReportQueryType`, `ArrayReportQueryType`, `DetailedReportQueryType`, `ReportTimePeriod`, `ReportResponse`, `ReportResponseShort`, `ArrayReportResponse`                  |
 | Report items   | `TradeItem`, `CorporateActionsItem`, `AccountSnapshotReport`, `AccountAtStartReport`, `AccountAtEndReport`, `AccountAtEndPortfolioAccount`, `AccountAtEndPortfolioPosition`, `CommissionItem`, `CashFlowReportItem`, `SecuritiesFlowItem`, `InOutItem`, `InOutSecuritiesItem` |
 | Cash flows     | `UserCashFlowResponse`, `UserCashFlowsParams`, `UserCashFlowsParamsFilter`, `UserCashFlowsParamsSort`, `UserCashFlowsField`, `CashFlowItem`                                                                                                                                   |
 | Portfolio      | `PortfolioSnapshot`, `PortfolioAccount`, `PortfolioPosition`                                                                                                                                                                                                                  |

@@ -26,8 +26,8 @@ The `type` argument controls the report structure and item type.
 | `account_at_start`   | `AccountAtStartReport` with `report.account.positions_from_ts` |
 | `account_at_end`     | `AccountAtEndReport` with `report.account.positions_from_ts`   |
 | `commissions`        | `report.detailed: CommissionItem[]`                            |
-| `cash_flows`         | `report: Record<string, CashFlowReportItem>`                   |
-| `securities_flows`   | `report: Record<string, SecuritiesFlowItem>`                   |
+| `cash_flows`         | `report: CashFlowReportItem[]`                                 |
+| `securities_flows`   | `report: SecuritiesFlowItem[]`                                 |
 | `in_outs`            | `report.detailed: InOutItem[]`                                 |
 | `in_outs_securities` | `report.detailed: InOutSecuritiesItem[]`                       |
 
@@ -57,7 +57,7 @@ A useful integrity check is `sum(pos[].posval) + sum(acc[].s) === account.net_as
 
 ## Cash Flow Summaries
 
-The `cash_flows` broker report is a per-currency summary. Its `report` property is an object with numeric string keys, not a detailed array.
+The `cash_flows` broker report is a per-currency summary. Its `report` property is an array, not an object containing `detailed`.
 
 ```ts
 const result = await tradernet.getBrokerReport({ dateFrom: '2022-01-01', dateTo: '2022-12-31' }, 'cash_flows')
@@ -66,7 +66,7 @@ if (!result.success) {
   throw new Error(result.message ?? result.error)
 }
 
-for (const flow of Object.values(result.data.report)) {
+for (const flow of result.data.report) {
   const expectedEnd = flow.curr_at_start + Number(flow.curr_flowed) - Number(flow.curr_commissioned) + flow.curr_traded
   console.log(flow.curr, flow.curr_at_end, expectedEnd)
 }
@@ -76,13 +76,13 @@ Tradernet returns `curr_at_start`, `curr_traded`, and `curr_at_end` as numbers, 
 
 ## Securities Flow Summaries
 
-The `securities_flows` block has the same indexed container shape, with one `SecuritiesFlowItem` per ticker:
+The `securities_flows` block has the same array container shape, with one `SecuritiesFlowItem` per ticker:
 
 ```ts
 const result = await tradernet.getBrokerReport({ dateFrom: '2022-01-01', dateTo: '2022-12-31' }, 'securities_flows')
 
 if (result.success) {
-  for (const flow of Object.values(result.data.report)) {
+  for (const flow of result.data.report) {
     console.log(flow.ticker, flow.quantity_at_start, flow.quantity_at_end, flow.position_value)
   }
 }
