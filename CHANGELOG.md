@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.0.7 - 2026-09-15
 
 - Support `account_at_start`, `in_outs`, and `in_outs_securities` broker report query types.
 - Accept and type the indexed response containers returned by `cash_flows` and `securities_flows` reports.
