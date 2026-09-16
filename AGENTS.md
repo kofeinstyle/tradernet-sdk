@@ -51,6 +51,8 @@ Recent history uses short, imperative or release-oriented messages, for example 
 
 Use release tags without a `v` prefix to match existing project history, for example `0.0.1` instead of `v0.0.1`.
 
+Push tested changes to the `dev` branch for npm prereleases. The publish workflow derives a unique next-patch `-dev.<run>.<attempt>` version from the stable source version and publishes it with npm's `dev` dist-tag. Do not commit generated prerelease versions or create Git tags for these builds. Only stable tags publish to `latest` and trigger the Context7 refresh.
+
 For each stable release, add its tag to the beginning of `context7.json` `previousVersions` in the release commit, then push that commit before creating the tag. The Context7 refresh workflow runs when the stable tag is pushed. Do not add beta or alpha tags.
 
 Pull requests should include a short description, test results, and any API surface changes. Link related issues when available. For behavior changes, include a minimal usage example or before/after note. Do not include generated `dist/` changes unless the release process requires them.

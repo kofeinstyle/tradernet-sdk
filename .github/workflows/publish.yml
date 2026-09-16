@@ -2,6 +2,8 @@ name: Publish Package to npmjs
 
 on:
   push:
+    branches:
+      - dev
     tags:
       - '*.*.*'
       - '!**-*'
@@ -29,6 +31,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Set development version
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [[ ! "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo 'The source package version must be a stable semver version.' >&2
+            exit 1
+          fi
+          npm version "${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))-dev.${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}" --no-git-tag-version
+
+      - name: Verify stable release tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: test "$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+
       - name: Type check
         run: npm run check
 
@@ -44,5 +60,10 @@ jobs:
       - name: Verify npm package contents
         run: npm pack --dry-run
 
-      - name: Publish to npm
+      - name: Publish stable release to npm
+        if: startsWith(github.ref, 'refs/tags/')
         run: npm publish --provenance --access public
+
+      - name: Publish development build to npm
+        if: github.ref == 'refs/heads/dev'
+        run: npm publish --provenance --access public --tag dev

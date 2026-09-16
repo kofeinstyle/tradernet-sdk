@@ -207,6 +207,8 @@ npm run playground -- help
 
 Jest always uses mocked HTTP responses. Use the read-only [live API playground](playground/README.md) for explicit checks with local credentials.
 
+Push changes to the `dev` branch to publish a prerelease under the npm `dev` tag. The workflow derives a unique version from the next patch release, for example `0.0.9-dev.15.1`; it does not change `latest` or refresh Context7. To test it in a Bun application, run `bun add @kofeinstyle/tradernet-sdk@dev --exact` again after each successful publication. Return to the stable package with `bun add @kofeinstyle/tradernet-sdk@latest --exact`.
+
 See [AGENTS.md](AGENTS.md) for repository and release conventions.
 
 ## License
