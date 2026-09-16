@@ -1,13 +1,20 @@
 import { logger } from './helper'
 import { HttpClient } from './http'
 import {
+  normalizeAccountSnapshotReport,
+  normalizeCashFlowReportItem,
   normalizeCorporateActionsItem,
+  normalizeInOutItem,
   normalizeOrder,
   normalizePortfolioAccount,
   normalizePortfolioPosition,
+  normalizeReportTotals,
+  normalizeSecuritiesFlowItem,
+  normalizeTradeItem,
   normalizeUserProfile,
 } from './mappers'
 import type {
+  ArrayReportQueryType,
   BrokerReportResponse,
   CashFlowResponse,
   OrdersFilter,
@@ -77,6 +84,7 @@ export class TradernetApiClient {
     }
 
     if (type === 'account_at_start' || type === 'account_at_end') {
+      normalizeAccountSnapshotReport(result.data)
       if (!this.hasAccountSnapshotReport(result.data)) {
         return {
           success: false,
@@ -98,6 +106,20 @@ export class TradernetApiClient {
           error: 'Invalid API response',
           message: `Missing report array data for ${type} report`,
         }
+      }
+
+      const normalizeItem = this.getArrayReportItemNormalizer(type)
+      const report: Record<string, unknown>[] = result.data.report
+      for (const [index, item] of report.entries()) {
+        const normalizedItem = normalizeItem(item)
+        if (!normalizedItem) {
+          return {
+            success: false,
+            error: 'Invalid API response',
+            message: `Invalid ${type} item at index ${index}`,
+          }
+        }
+        report[index] = normalizedItem
       }
 
       return {
@@ -122,15 +144,18 @@ export class TradernetApiClient {
       }
     }
 
-    if (type === 'corporate_actions') {
+    normalizeReportTotals(result.data.report)
+
+    const normalizeDetailedItem = this.getDetailedReportItemNormalizer(type)
+    if (normalizeDetailedItem) {
       const normalizedItems = []
       for (const [index, item] of result.data.report.detailed.entries()) {
-        const normalizedItem = normalizeCorporateActionsItem(item)
+        const normalizedItem = normalizeDetailedItem(item)
         if (!normalizedItem) {
           return {
             success: false,
             error: 'Invalid API response',
-            message: `Invalid corporate_actions item at index ${index}`,
+            message: `Invalid ${type} item at index ${index}`,
           }
         }
         normalizedItems.push(normalizedItem)
@@ -398,6 +423,25 @@ export class TradernetApiClient {
     return {
       success: true,
       data: profile,
+    }
+  }
+
+  private getArrayReportItemNormalizer(type: ArrayReportQueryType): (item: unknown) => Record<string, unknown> | null {
+    return type === 'cash_flows' ? normalizeCashFlowReportItem : normalizeSecuritiesFlowItem
+  }
+
+  private getDetailedReportItemNormalizer(
+    type: ReportQueryType
+  ): ((item: unknown) => Record<string, unknown> | null) | null {
+    switch (type) {
+      case 'corporate_actions':
+        return normalizeCorporateActionsItem
+      case 'trades':
+        return normalizeTradeItem
+      case 'in_outs':
+        return normalizeInOutItem
+      default:
+        return null
     }
   }
 

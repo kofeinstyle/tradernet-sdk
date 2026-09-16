@@ -1,4 +1,10 @@
-import type { CorporateActionsItem } from './types/broker-reports'
+import type {
+  CashFlowReportItem,
+  CorporateActionsItem,
+  InOutItem,
+  SecuritiesFlowItem,
+  TradeItem,
+} from './types/broker-reports'
 import type { Order, OrderTrade } from './types/orders'
 import type { PortfolioAccount, PortfolioPosition } from './types/portfolio'
 import type { UserProfile } from './types/user-profile'
@@ -351,4 +357,241 @@ export const normalizeUserProfile = (data: unknown): UserProfile | null => {
   }
 
   return { homeCurrency: profile.homeCurrency, main_curr: profile.main_curr }
+}
+
+const cashFlowNumericFields = [
+  'curr_at_start',
+  'curr_traded',
+  'curr_commissioned',
+  'curr_flowed',
+  'curr_at_end',
+] as const
+const cashFlowStringFields = ['date_start', 'date_end', 'curr'] as const
+
+const securitiesFlowRequiredNumericFields = [
+  'quantity_at_start',
+  'securities_traded',
+  'securities_flowed',
+  'quantity_at_end',
+  'security_price_at_start',
+  'security_price',
+  'position_value',
+] as const
+const securitiesFlowOptionalNumericFields = ['instr_type', 'instr_kind'] as const
+const securitiesFlowStringFields = ['date_start', 'date_end', 'ticker', 'security_currency'] as const
+const securitiesFlowNumericStringFields = ['mkt_id'] as const
+
+const tradeRequiredNumericFields = ['trade_id', 'transaction_id', 'commission', 'q', 'p', 'summ', 'instr_type'] as const
+const tradeOptionalNumericFields = ['mkt_id'] as const
+const tradeStringFields = ['id', 'date', 'operation', 'instr_nm', 'curr_c', 'commission_currency'] as const
+const tradeNumericStringFields = ['id', 'order_id', 'issue_nb'] as const
+
+const inOutRequiredNumericFields = ['amount'] as const
+const inOutOptionalNumericFields = ['account_id'] as const
+const inOutStringFields = ['date', 'currency'] as const
+const inOutNumericStringFields = ['sum'] as const
+
+const accountSnapshotAccountNumericFields = [
+  ...portfolioAccountRequiredNumericFields,
+  ...portfolioAccountOptionalNumericFields,
+  'net_assets',
+  'posval',
+] as const
+const accountSnapshotPositionNumericFields = [
+  ...portfolioPositionRequiredNumericFields,
+  ...portfolioPositionOptionalNumericFields,
+  'posval',
+  'mval',
+  'profit',
+  'profit_in_position_currency',
+  'unrealized_profit',
+  'gain',
+  'total_securities',
+  'total_stocks',
+  'total_bonds',
+  'total_forts',
+  'total_crypto',
+  'margin_securities',
+  'net_assets',
+] as const
+
+/**
+ * Rewrites numeric strings in place without rejecting anything. Used where the SDK has no
+ * confirmed contract for which fields are always present, so a missing field must not fail a
+ * whole report.
+ */
+const coerceNumericFields = (result: Record<string, unknown>, fields: readonly string[]): void => {
+  for (const field of fields) {
+    if (typeof result[field] !== 'string') {
+      continue
+    }
+
+    const value = toNumber(result[field])
+    if (value !== null) {
+      result[field] = value
+    }
+  }
+}
+
+/** Mirror case of {@link coerceNumericFields}: a field documented as a string arriving as a number. */
+const coerceStringFields = (result: Record<string, unknown>, fields: readonly string[]): void => {
+  for (const field of fields) {
+    const value = result[field]
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      result[field] = String(value)
+    }
+  }
+}
+
+const isCashFlowReportItem = (item: unknown): item is CashFlowReportItem => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return hasRequiredStringFields(item, cashFlowStringFields) && hasNumericFields(item, cashFlowNumericFields, [])
+}
+
+/**
+ * Tradernet mixes JSON numbers and numeric strings inside a single `cash_flows` response, and the
+ * representation of a field changes between responses, so every documented amount is normalized.
+ */
+export const normalizeCashFlowReportItem = (item: unknown): CashFlowReportItem | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  if (!normalizeNumericFields(result, cashFlowNumericFields, [])) {
+    return null
+  }
+
+  return isCashFlowReportItem(result) ? result : null
+}
+
+const isSecuritiesFlowItem = (item: unknown): item is SecuritiesFlowItem => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return (
+    hasRequiredStringFields(item, securitiesFlowStringFields) &&
+    hasNumericFields(item, securitiesFlowRequiredNumericFields, securitiesFlowOptionalNumericFields) &&
+    hasOptionalStringFields(item, securitiesFlowNumericStringFields)
+  )
+}
+
+export const normalizeSecuritiesFlowItem = (item: unknown): SecuritiesFlowItem | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  if (!normalizeNumericFields(result, securitiesFlowRequiredNumericFields, securitiesFlowOptionalNumericFields)) {
+    return null
+  }
+  coerceStringFields(result, securitiesFlowNumericStringFields)
+
+  return isSecuritiesFlowItem(result) ? result : null
+}
+
+const isTradeItem = (item: unknown): item is TradeItem => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return (
+    hasRequiredStringFields(item, tradeStringFields) &&
+    hasNumericFields(item, tradeRequiredNumericFields, tradeOptionalNumericFields) &&
+    hasOptionalStringFields(item, tradeNumericStringFields)
+  )
+}
+
+export const normalizeTradeItem = (item: unknown): TradeItem | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  coerceStringFields(result, tradeNumericStringFields)
+  if (!normalizeNumericFields(result, tradeRequiredNumericFields, tradeOptionalNumericFields)) {
+    return null
+  }
+
+  return isTradeItem(result) ? result : null
+}
+
+const isInOutItem = (item: unknown): item is InOutItem => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return (
+    hasRequiredStringFields(item, inOutStringFields) &&
+    hasNumericFields(item, inOutRequiredNumericFields, inOutOptionalNumericFields) &&
+    hasOptionalStringFields(item, inOutNumericStringFields)
+  )
+}
+
+export const normalizeInOutItem = (item: unknown): InOutItem | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  coerceStringFields(result, inOutNumericStringFields)
+  if (!normalizeNumericFields(result, inOutRequiredNumericFields, inOutOptionalNumericFields)) {
+    return null
+  }
+
+  return isInOutItem(result) ? result : null
+}
+
+const normalizeSnapshotRows = (rows: unknown, fields: readonly string[]): void => {
+  if (!Array.isArray(rows)) {
+    return
+  }
+
+  for (const row of rows) {
+    if (isRecord(row)) {
+      coerceNumericFields(row, fields)
+    }
+  }
+}
+
+/**
+ * Coerces the documented numeric fields of an account snapshot in place without rejecting rows:
+ * the report structure itself is validated by the client, and a snapshot must not fail because a
+ * single undocumented row field is missing.
+ */
+export const normalizeAccountSnapshotReport = (data: unknown): void => {
+  if (!isRecord(data) || !isRecord(data.report) || !isRecord(data.report.account)) {
+    return
+  }
+
+  const account = data.report.account
+  coerceNumericFields(account, ['net_assets'])
+
+  const positions = account.positions_from_ts
+  if (!isRecord(positions) || !isRecord(positions.ps)) {
+    return
+  }
+
+  normalizeSnapshotRows(positions.ps.acc, accountSnapshotAccountNumericFields)
+  normalizeSnapshotRows(positions.ps.pos, accountSnapshotPositionNumericFields)
+}
+
+/** `report.total`, `report.totalTrading`, and `report.securities` are documented as numeric maps. */
+export const normalizeReportTotals = (report: unknown): void => {
+  if (!isRecord(report)) {
+    return
+  }
+
+  for (const key of ['total', 'totalTrading', 'securities']) {
+    const map = report[key]
+    if (!isRecord(map)) {
+      continue
+    }
+
+    coerceNumericFields(map, Object.keys(map))
+  }
 }

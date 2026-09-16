@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Type every documented `cash_flows` amount as a number: Tradernet sends the same field as a JSON number in one response and as a numeric string in the next, so `curr_commissioned` and `curr_flowed` are no longer typed as strings.
+- Normalize the documented numeric fields of `cash_flows`, `securities_flows`, `trades`, `in_outs`, and account snapshot rows, and report a malformed row as `Invalid <type> item at index N`.
+- Normalize `securities_flows.mkt_id`, `trades.id`, and `trades.order_id` to strings, and `in_outs.amount` and `in_outs.account_id` to numbers.
+- Normalize the `report.total`, `report.totalTrading`, and `report.securities` numeric maps.
+- Document that the row order of `cash_flows` and `securities_flows` is not stable.
+
 ## 0.0.8 - 2026-09-15
 
 - Fix `cash_flows` and `securities_flows` broker reports to accept the arrays returned by Tradernet.

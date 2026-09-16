@@ -90,6 +90,17 @@ Tradernet and the Python SDK use the `getPositionJson` command without request p
 - [ ] Publish a new SDK version.
 - [ ] Upgrade the consuming server and map order rows to an application DTO.
 
+## Broker Reports
+
+### Confirmed Contract
+
+- Tradernet does not keep one representation per field. Three live `cash_flows` responses for 2026-09-16 returned `curr_flowed` as `0`, `"100"`, and `"10"`, and `curr_commissioned` as `0`, `"0"`, and `"0.2"`, within the same account and date range. Zero values tended to arrive as numbers and non-zero values as strings, but the sample is too small to treat that as a rule, so every documented amount is normalized.
+- `curr_at_start + curr_flowed - curr_commissioned + curr_traded == curr_at_end` held in every observed response, including negative `curr_traded`.
+- The row order of the `cash_flows` array is not stable between responses for the same range.
+- `trades` numeric fields are normalized for the same reason; the consuming server already had to coerce `p`, `q`, `summ`, `commission`, and `transaction_id` on its side.
+- Account snapshot rows are coerced but never rejected: there is no confirmed contract for which row fields are always present, and a snapshot is the only source of capital history.
+- `CommissionItem` and `InOutSecuritiesItem` stay untyped records until live data is available.
+
 ## Later Work
 
 Prioritize later endpoints from actual consumer requirements rather than adding broad API coverage speculatively.

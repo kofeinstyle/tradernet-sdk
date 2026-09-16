@@ -197,8 +197,8 @@ describe('Public API types', () => {
       curr: 'USD',
       curr_at_start: 0,
       curr_traded: -48000,
-      curr_commissioned: '500.00',
-      curr_flowed: '50000.00',
+      curr_commissioned: 500,
+      curr_flowed: 50000,
       curr_at_end: 1500,
     }
     const securitiesFlow: SecuritiesFlowItem = {

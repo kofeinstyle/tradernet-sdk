@@ -2,6 +2,10 @@ import type { CorporateActionTypesValue, InstrumentValue, TradeOperationValue } 
 import type { FiatCurrency, OpenString } from './common'
 import type { PortfolioAccount, PortfolioPosition } from './portfolio'
 
+/**
+ * Executed trade row of the `trades` report. Documented numeric fields are normalized to numbers
+ * even when Tradernet sends them as numeric strings.
+ */
 export type TradeItem = {
   id: string
   trade_id: number
@@ -94,17 +98,31 @@ export type AccountSnapshotReport = {
 export type AccountAtStartReport = AccountSnapshotReport
 export type AccountAtEndReport = AccountSnapshotReport
 
+/**
+ * Per-currency cash flow summary.
+ *
+ * Tradernet returns every amount either as a JSON number or as a numeric string, and the
+ * representation of one field can change between two responses for the same date range. The SDK
+ * normalizes all documented amounts to numbers, so `curr_at_start + curr_flowed -
+ * curr_commissioned + curr_traded` equals `curr_at_end` without further conversion.
+ *
+ * The order of the rows inside `report` is not stable; match rows by `curr`.
+ */
 export type CashFlowReportItem = {
   date_start: string
   date_end: string
   curr: FiatCurrency
   curr_at_start: number
   curr_traded: number
-  curr_commissioned: string
-  curr_flowed: string
+  curr_commissioned: number
+  curr_flowed: number
   curr_at_end: number
 }
 
+/**
+ * Per-ticker securities flow summary. Documented numeric fields are normalized to numbers, and
+ * `mkt_id` is normalized to a string. The order of the rows inside `report` is not stable.
+ */
 export type SecuritiesFlowItem = {
   date_start: string
   date_end: string
@@ -126,6 +144,10 @@ export type SecuritiesFlowItem = {
 export type KnownInOutType = 'bank' | 'card' | 'dividend' | 'tax' | 'dividend_reverted' | 'tax_reverted'
 export type InOutType = OpenString<KnownInOutType>
 
+/**
+ * Inbound or outbound cash record. `amount` and `account_id` are normalized to numbers, `sum`
+ * stays the string representation Tradernet renders in the report.
+ */
 export type InOutItem = {
   date: string
   account: string
