@@ -25,6 +25,7 @@
     "cash_flows and securities_flows broker reports return rows directly in response.data.report arrays; they do not use report.detailed.",
     "Broker report amounts are already normalized to numbers; read cash_flows fields such as curr_flowed and curr_commissioned directly instead of wrapping them in Number().",
     "Match cash_flows and securities_flows rows by curr or ticker; their order inside report is not stable.",
+    "Pass getUserCashFlows sort as a single { field, dir } object, not an array; Tradernet rejects the array form shown in its docs. filters remains an array.",
     "Use getPortfolio for the current read-only account balances and open positions.",
     "Use getOrders for current-period orders and getOrdersHistory for an explicit date range.",
     "Use OrderStatuses for documented order status codes; OrderStatus intentionally also accepts unknown numeric codes.",

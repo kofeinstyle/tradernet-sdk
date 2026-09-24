@@ -48,6 +48,8 @@ getUserCashFlows(params?: UserCashFlowsParams): Promise<UserCashFlowResponse>
 
 Parameters support pagination, filtering, sorting, grouping, and Tradernet numeric flags.
 
+`filters` is an array of `UserCashFlowsParamsFilter`; `sort` is a single `UserCashFlowsParamsSort` object, not an array, because Tradernet rejects the array form.
+
 ### getPortfolio
 
 ```ts
