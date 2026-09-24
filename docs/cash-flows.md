@@ -16,7 +16,7 @@ if (!result.success) {
 }
 
 for (const operation of result.data.cashflow) {
-  console.log(operation.date, operation.type_code, operation.sum, operation.currency)
+  console.log(operation.date, operation.type_code, operation.sum, operation.currency, operation.balance)
 }
 ```
 
@@ -94,6 +94,8 @@ A successful response contains:
 - `cash_totals`: optional cash totals returned by Tradernet.
 - `limits`: optional server-provided filter limits.
 
-The SDK normalizes `CashFlowItem.sum` and `CashFlowItem.sumRaw` to numbers. Transaction type and currency fields accept values added by Tradernet while preserving autocomplete for known values.
+The SDK normalizes `CashFlowItem.sum`, `CashFlowItem.sumRaw`, and `CashFlowItem.balance` to numbers. `balance` is the account balance in the row currency after the operation; Tradernet sends it as a string such as `"1780.61000000"`.
+
+`type_code` is a `TransactionTypeCode`. `KnownTransactionTypeCode` lists every code from the broker reference (https://freedom24.com/tradernet-api/type-codes) plus `commission_for_other` and `commission_for_trades`, which the API returns but the reference omits. Transaction type and currency fields accept values added by Tradernet while preserving autocomplete for known values.
 
 Cash flow dividend entries are account ledger operations. Use the `corporate_actions` broker report when ex-date, security quantity, or dividend tax details are required.
