@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `null` and `undefined` params are omitted from the request instead of being sent as the strings "null" and "undefined", which Tradernet rejects.
 - Add `CashFlowItem.balance`, the account balance in the row currency after the operation; `getUserCashFlows` normalizes it from a string to a number.
 - `KnownTransactionTypeCode` lists all 97 codes from the broker type-code reference plus `commission_for_other` and `commission_for_trades`, which the API returns but the reference omits.
 - `getUserCashFlows` `sort` is a single descriptor, not an array: Tradernet rejects the array form with "Incorrect request parameters", contrary to its docs.
