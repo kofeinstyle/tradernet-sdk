@@ -1,4 +1,5 @@
 import { TradernetApiClient } from '../src'
+import type { CashFlowItem, KnownTransactionTypeCode } from '../src'
 import { HttpClient } from '../src/http'
 
 global.fetch = jest.fn()
@@ -55,11 +56,12 @@ describe('getUserCashFlows', () => {
     expect(result.data).toBeUndefined()
   })
 
-  it('normalizes sums without mutating the raw response item', async () => {
+  it('normalizes sums and balance without mutating the raw response item', async () => {
     const item = {
       id: 3301045607,
       sumRaw: '12.50',
       sum: '10.25',
+      balance: '1780.61000000',
     }
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,
@@ -75,8 +77,31 @@ describe('getUserCashFlows', () => {
     expect(result.success).toBe(true)
     expect(result.data?.cashflow[0].sumRaw).toBe(12.5)
     expect(result.data?.cashflow[0].sum).toBe(10.25)
+    expect(result.data?.cashflow[0].balance).toBe(1780.61)
     expect(item.sumRaw).toBe('12.50')
     expect(item.sum).toBe('10.25')
+    expect(item.balance).toBe('1780.61000000')
+  })
+
+  it('types live cash flow rows without casts', () => {
+    const typeCode: KnownTransactionTypeCode = 'commission_for_other'
+    const item: CashFlowItem = {
+      id: 123595947,
+      type_code: typeCode,
+      date: '2026-09-16',
+      datetime: '2026-09-16 18:37:07',
+      currency: 'USD',
+      comment: 'Card top-up fee',
+      account: '-',
+      sum: -0.3,
+      min_step: '0.01000000',
+      balance: 1780.31,
+      icon: 'commission',
+      type_code_name: 'Commission',
+      sumRaw: -0.3,
+    }
+
+    expect(item.type_code).toBe('commission_for_other')
   })
 
   it('sends filters as form encoded params', async () => {

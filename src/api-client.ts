@@ -210,6 +210,7 @@ export class TradernetApiClient {
           ...item,
           sumRaw: Number(item.sumRaw),
           sum: Number(item.sum),
+          balance: Number(item.balance),
         })),
       },
     }

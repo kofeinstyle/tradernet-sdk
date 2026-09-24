@@ -50,6 +50,8 @@ Parameters support pagination, filtering, sorting, grouping, and Tradernet numer
 
 `filters` is an array of `UserCashFlowsParamsFilter`; `sort` is a single `UserCashFlowsParamsSort` object, not an array, because Tradernet rejects the array form.
 
+Each `CashFlowItem` has numeric `sum`, `sumRaw`, and `balance`; `balance` is the account balance in the row currency after the operation. `type_code` accepts every code from the broker reference plus `commission_for_other` and `commission_for_trades`, and still accepts unknown codes.
+
 ### getPortfolio
 
 ```ts
