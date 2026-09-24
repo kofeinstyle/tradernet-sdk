@@ -170,8 +170,7 @@ export class TradernetApiClient {
   }
 
   async getUserCashFlows(params?: UserCashFlowsParams): Promise<UserCashFlowResponse> {
-    const payload: UserCashFlowsParams = params ? { ...params } : { take: null }
-    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', payload, 1)
+    const result = await this.httpClient.makeRequest<CashFlowResponse>('getUserCashFlows', params, 1)
 
     if (!result.success) {
       return {

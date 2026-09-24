@@ -141,10 +141,16 @@ export class HttpClient {
 
     for (const key of keys) {
       const value = params[key]
-      if (Array.isArray(value)) {
-        parts.push(`${key}=${this.preSign(Object.fromEntries(value.entries()))}`)
-      } else if (this.isRecord(value)) {
-        parts.push(`${key}=${this.preSign(value)}`)
+      if (this.isMissing(value)) {
+        continue
+      }
+
+      if (Array.isArray(value) || this.isRecord(value)) {
+        const nested = this.preSign(Array.isArray(value) ? Object.fromEntries(value.entries()) : value)
+        // An object without sendable keys does not reach the body, so it must not be signed either
+        if (nested) {
+          parts.push(`${key}=${nested}`)
+        }
       } else {
         parts.push(`${key}=${value}`)
       }
@@ -161,9 +167,17 @@ export class HttpClient {
     }
 
     for (const [key, value] of Object.entries(data)) {
+      // Tradernet rejects the strings "null" and "undefined", so missing values are omitted
+      if (this.isMissing(value)) {
+        continue
+      }
+
       const encodedKey = prefix ? `${prefix}[${encodeURIComponent(key)}]` : encodeURIComponent(key)
-      if (value !== null && typeof value === 'object') {
-        formBody.push(this.toFormUrlEncoded(value, encodedKey))
+      if (typeof value === 'object') {
+        const nested = this.toFormUrlEncoded(value, encodedKey)
+        if (nested) {
+          formBody.push(nested)
+        }
       } else {
         const encodedValue = encodeURIComponent(String(value))
         formBody.push(`${encodedKey}=${encodedValue}`)
@@ -196,6 +210,10 @@ export class HttpClient {
     return (
       typeof response === 'object' && response !== null && 'error' in response && typeof response.error === 'string'
     )
+  }
+
+  private isMissing(value: unknown): value is null | undefined {
+    return value === null || value === undefined
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {
