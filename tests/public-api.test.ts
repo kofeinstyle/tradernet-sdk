@@ -74,7 +74,7 @@ describe('Public API types', () => {
     }
     const sortField: UserCashFlowsField = 'date'
     const sort: UserCashFlowsParamsSort = { field: sortField, dir: 'DESC' }
-    const params: UserCashFlowsParams = { take: 100, filters: [filter], sort: [sort] }
+    const params: UserCashFlowsParams = { take: 100, filters: [filter], sort }
     const cashFlowItem = {} as CashFlowItem
     const response: UserCashFlowResponse = {
       success: true,
@@ -82,7 +82,7 @@ describe('Public API types', () => {
     }
 
     expect(params.filters).toEqual([filter])
-    expect(params.sort).toEqual([sort])
+    expect(params.sort).toEqual(sort)
     expect(response.data?.cashflow).toEqual([cashFlowItem])
   })
 

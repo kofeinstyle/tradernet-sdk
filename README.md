@@ -115,7 +115,7 @@ const result = await client.getUserCashFlows({
   take: 100,
   skip: 0,
   filters: [{ field: 'type_code', operator: 'eq', value: 'dividend' }],
-  sort: [{ field: 'date', dir: 'DESC' }],
+  sort: { field: 'date', dir: 'DESC' },
 })
 
 if (result.success) {

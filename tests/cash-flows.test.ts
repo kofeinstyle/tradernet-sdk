@@ -104,12 +104,13 @@ describe('getUserCashFlows', () => {
     })
 
     await client.getUserCashFlows({
-      sort: [{ field: 'date', dir: 'DESC' }],
+      sort: { field: 'date', dir: 'DESC' },
     })
 
     const requestOptions = (fetch as jest.Mock).mock.calls[0][1] as RequestInit
-    expect(requestOptions.body).toContain('params[sort][0][field]=date')
-    expect(requestOptions.body).toContain('params[sort][0][dir]=DESC')
+    expect(requestOptions.body).toContain('params[sort][field]=date')
+    expect(requestOptions.body).toContain('params[sort][dir]=DESC')
+    expect(requestOptions.body).not.toContain('params[sort][0]')
   })
 
   it('returns Tradernet API errors without successful data', async () => {
