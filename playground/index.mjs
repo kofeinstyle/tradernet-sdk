@@ -139,9 +139,11 @@ async function runCashFlows() {
     throw new Error('cash-flows take must be a positive integer')
   }
 
-  const result = await client.getUserCashFlows({ take })
+  const result = await client.getUserCashFlows({ take: 20, sort: { field: 'date', dir: 'ASC' } })
+
   printResult(result, data => ({
     command: 'cash-flows',
+    cashflow: data.cashflow,
     total: data.total,
     returned: data.cashflow.length,
   }))
