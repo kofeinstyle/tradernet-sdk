@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `getUserCashFlows` `sort` is a single descriptor, not an array: Tradernet rejects the array form with "Incorrect request parameters", contrary to its docs.
 - Type every documented `cash_flows` amount as a number: Tradernet sends the same field as a JSON number in one response and as a numeric string in the next, so `curr_commissioned` and `curr_flowed` are no longer typed as strings.
 - Normalize the documented numeric fields of `cash_flows`, `securities_flows`, `trades`, `in_outs`, and account snapshot rows, and report a malformed row as `Invalid <type> item at index N`.
 - Normalize `securities_flows.mkt_id`, `trades.id`, and `trades.order_id` to strings, and `in_outs.amount` and `in_outs.account_id` to numbers.

@@ -8,7 +8,7 @@ const result = await tradernet.getUserCashFlows({
   take: 100,
   skip: 0,
   filters: [{ field: 'type_code', operator: 'eq', value: 'dividend' }],
-  sort: [{ field: 'date', dir: 'DESC' }],
+  sort: { field: 'date', dir: 'DESC' },
 })
 
 if (!result.success) {
@@ -40,7 +40,7 @@ const result = await tradernet.getUserCashFlows()
 | `cash_totals`    | `number \| null`                      | Tradernet numeric flag for cash totals. |
 | `groupByType`    | `number \| null`                      | Tradernet numeric grouping flag.        |
 | `filters`        | `UserCashFlowsParamsFilter[] \| null` | Server-side filters.                    |
-| `sort`           | `UserCashFlowsParamsSort[] \| null`   | Server-side sorting.                    |
+| `sort`           | `UserCashFlowsParamsSort \| null`     | Server-side sorting.                    |
 
 ## Filtering
 
@@ -73,16 +73,13 @@ const result = await tradernet.getUserCashFlows({
 
 ## Sorting
 
-Sorting uses an array of `{ field, dir }` descriptors. Directions are `ASC` and `DESC`.
+Sorting uses a single `{ field, dir }` descriptor. Directions are `ASC` and `DESC`. Tradernet rejects an array of descriptors with `Incorrect request parameters`, although the broker documentation shows `sort` as an array.
 
 ```ts
 import type { UserCashFlowsParams } from '@kofeinstyle/tradernet-sdk'
 
 const params: UserCashFlowsParams = {
-  sort: [
-    { field: 'date', dir: 'DESC' },
-    { field: 'sum', dir: 'ASC' },
-  ],
+  sort: { field: 'date', dir: 'DESC' },
 }
 
 const result = await tradernet.getUserCashFlows(params)

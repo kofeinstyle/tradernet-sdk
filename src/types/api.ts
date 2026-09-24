@@ -99,7 +99,8 @@ export type UserCashFlowsParams = {
   groupByType?: number | null
   skip?: number | null
   filters?: UserCashFlowsParamsFilter[] | null
-  sort?: UserCashFlowsParamsSort[] | null
+  // Tradernet accepts a single sort descriptor, although the broker docs show an array
+  sort?: UserCashFlowsParamsSort | null
 }
 
 export type OrdersFilter = {
