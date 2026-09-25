@@ -4,6 +4,7 @@
   "description": "Typed TypeScript SDK for supported Tradernet API v2 user profile data, broker reports, user cash flows, portfolio snapshots, and read-only orders.",
   "branch": "main",
   "previousVersions": [
+    { "tag": "0.0.9" },
     { "tag": "0.0.8" },
     { "tag": "0.0.7" },
     { "tag": "0.0.6" },

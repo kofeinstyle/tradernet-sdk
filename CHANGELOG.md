@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.0.9 - 2026-09-25
 
 - `null` and `undefined` params are omitted from the request instead of being sent as the strings "null" and "undefined", which Tradernet rejects.
 - Add `CashFlowItem.balance`, the account balance in the row currency after the operation; `getUserCashFlows` normalizes it from a string to a number.
