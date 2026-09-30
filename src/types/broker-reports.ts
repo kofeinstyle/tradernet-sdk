@@ -160,4 +160,20 @@ export type InOutItem = {
   comment: string
 }
 
-export type InOutSecuritiesItem = Record<string, unknown>
+/**
+ * Inbound or outbound securities record, such as a stock split or promotional shares. `quantity`
+ * is normalized to a signed number: a split arrives as a negative debit of the old position and a
+ * positive credit of the new one. `date` includes the time without a timezone, `type` is the
+ * localized cabinet label (there is no `type_id`), and `comment` is passed through untrimmed. Rows
+ * without a non-empty `date`, `account`, `ticker`, `isin`, and `type` or without a string `comment`
+ * are rejected, so `isin` can be relied on to match a security whose ticker has changed.
+ */
+export type InOutSecuritiesItem = {
+  date: string
+  account: string
+  quantity: number
+  ticker: string
+  isin: string
+  type: string
+  comment: string
+}

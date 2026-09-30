@@ -525,6 +525,71 @@ describe('getBrokerReport', () => {
     expect(inOut.sum).toBe('10')
   })
 
+  it('gets inbound and outbound securities as typed rows', async () => {
+    const detailed = [
+      {
+        date: '2024-10-11 15:00:00',
+        account: 'trading',
+        quantity: -137,
+        ticker: 'SCHD.US',
+        isin: 'US8085247976',
+        type: 'Спліт',
+        comment: ' Stock split SCHD.US (US8085247976). Record date 2024-10-10, factor: 1/3. ',
+      },
+      {
+        date: '2026-09-30 15:52:25',
+        account: 'trading',
+        quantity: '1',
+        ticker: 'PL.US',
+        isin: 'US72703X1063',
+        type: 'Подарункові акції',
+        comment: ' Account credited with stocks: Promo 423:MAPLE5',
+      },
+    ]
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ report: { detailed, total: { 'PL.US': '1', 'RGTI.US': 1, 'KGC.US': 1 } } }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'in_outs_securities')
+
+    expect(result.success).toBe(true)
+    if (!result.success) {
+      throw new Error(result.message)
+    }
+    const [split, promo] = result.data.report.detailed
+    expect(split).toStrictEqual(detailed[0])
+    expect(promo.quantity).toBe(1)
+    expect(promo.ticker).toBe('PL.US')
+    expect(result.data.report.total).toEqual({ 'PL.US': 1, 'RGTI.US': 1, 'KGC.US': 1 })
+  })
+
+  it.each(['in_outs', 'in_outs_securities'] as const)(
+    'normalizes the empty-period totals of %s to a map',
+    async type => {
+      ;(fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ report: { detailed: [], total: [] } }),
+      })
+
+      const result = await client.getBrokerReport(makeDateRange(), type)
+
+      expect(result).toEqual({ success: true, data: { report: { detailed: [], total: {} } } })
+    }
+  )
+
+  it('rejects an inbound securities row without a quantity', async () => {
+    ;(fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ report: { detailed: [{ date: '2026-09-30 15:52:25', ticker: 'PL.US' }] } }),
+    })
+
+    const result = await client.getBrokerReport(makeDateRange(), 'in_outs_securities')
+
+    expect(result.success).toBe(false)
+    expect(result.message).toBe('Invalid in_outs_securities item at index 0')
+  })
+
   it('normalizes numeric strings inside an account snapshot without rejecting rows', async () => {
     ;(fetch as jest.Mock).mockResolvedValueOnce({
       ok: true,

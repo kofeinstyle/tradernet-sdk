@@ -2,6 +2,7 @@ import type {
   CashFlowReportItem,
   CorporateActionsItem,
   InOutItem,
+  InOutSecuritiesItem,
   SecuritiesFlowItem,
   TradeItem,
 } from './types/broker-reports'
@@ -391,6 +392,9 @@ const inOutOptionalNumericFields = ['account_id'] as const
 const inOutStringFields = ['date', 'currency'] as const
 const inOutNumericStringFields = ['sum'] as const
 
+const inOutSecuritiesNumericFields = ['quantity'] as const
+const inOutSecuritiesStringFields = ['date', 'account', 'ticker', 'isin', 'type'] as const
+
 const accountSnapshotAccountNumericFields = [
   ...portfolioAccountRequiredNumericFields,
   ...portfolioAccountOptionalNumericFields,
@@ -546,6 +550,31 @@ export const normalizeInOutItem = (item: unknown): InOutItem | null => {
   return isInOutItem(result) ? result : null
 }
 
+const isInOutSecuritiesItem = (item: unknown): item is InOutSecuritiesItem => {
+  if (!isRecord(item)) {
+    return false
+  }
+
+  return (
+    hasRequiredStringFields(item, inOutSecuritiesStringFields) &&
+    typeof item.comment === 'string' &&
+    hasNumericFields(item, inOutSecuritiesNumericFields, [])
+  )
+}
+
+export const normalizeInOutSecuritiesItem = (item: unknown): InOutSecuritiesItem | null => {
+  if (!isRecord(item)) {
+    return null
+  }
+
+  const result = { ...item }
+  if (!normalizeNumericFields(result, inOutSecuritiesNumericFields, [])) {
+    return null
+  }
+
+  return isInOutSecuritiesItem(result) ? result : null
+}
+
 const normalizeSnapshotRows = (rows: unknown, fields: readonly string[]): void => {
   if (!Array.isArray(rows)) {
     return
@@ -580,7 +609,10 @@ export const normalizeAccountSnapshotReport = (data: unknown): void => {
   normalizeSnapshotRows(positions.ps.pos, accountSnapshotPositionNumericFields)
 }
 
-/** `report.total`, `report.totalTrading`, and `report.securities` are documented as numeric maps. */
+/**
+ * `report.total`, `report.totalTrading`, and `report.securities` are documented as numeric maps.
+ * Tradernet encodes an empty map as `[]`, for example `report.total` of an empty period.
+ */
 export const normalizeReportTotals = (report: unknown): void => {
   if (!isRecord(report)) {
     return
@@ -588,6 +620,10 @@ export const normalizeReportTotals = (report: unknown): void => {
 
   for (const key of ['total', 'totalTrading', 'securities']) {
     const map = report[key]
+    if (Array.isArray(map) && map.length === 0) {
+      report[key] = {}
+      continue
+    }
     if (!isRecord(map)) {
       continue
     }

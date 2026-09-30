@@ -5,6 +5,7 @@ import {
   normalizeCashFlowReportItem,
   normalizeCorporateActionsItem,
   normalizeInOutItem,
+  normalizeInOutSecuritiesItem,
   normalizeOrder,
   normalizePortfolioAccount,
   normalizePortfolioPosition,
@@ -440,6 +441,8 @@ export class TradernetApiClient {
         return normalizeTradeItem
       case 'in_outs':
         return normalizeInOutItem
+      case 'in_outs_securities':
+        return normalizeInOutSecuritiesItem
       default:
         return null
     }

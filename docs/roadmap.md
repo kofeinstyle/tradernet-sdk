@@ -99,7 +99,8 @@ Tradernet and the Python SDK use the `getPositionJson` command without request p
 - The row order of the `cash_flows` array is not stable between responses for the same range.
 - `trades` numeric fields are normalized for the same reason; the consuming server already had to coerce `p`, `q`, `summ`, `commission`, and `transaction_id` on its side.
 - Account snapshot rows are coerced but never rejected: there is no confirmed contract for which row fields are always present, and a snapshot is the only source of capital history.
-- `CommissionItem` and `InOutSecuritiesItem` stay untyped records until live data is available.
+- `in_outs_securities` rows were confirmed against a live account on 2026-09-30: splits and promotional shares, with a signed `quantity`, a timestamped `date`, a localized `type`, and no `type_id`.
+- `CommissionItem` stays an untyped record until live data is available.
 
 ## Later Work
 

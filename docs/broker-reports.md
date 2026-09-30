@@ -31,7 +31,7 @@ The `type` argument controls the report structure and item type.
 | `in_outs`            | `report.detailed: InOutItem[]`                                 |
 | `in_outs_securities` | `report.detailed: InOutSecuritiesItem[]`                       |
 
-`TradeItem`, `CorporateActionsItem`, account snapshots, cash-flow summaries, securities-flow summaries, and `InOutItem` have endpoint-specific fields. Commission and inbound/outbound securities items remain generic records until their contracts are stabilized.
+`TradeItem`, `CorporateActionsItem`, account snapshots, cash-flow summaries, securities-flow summaries, `InOutItem`, and `InOutSecuritiesItem` have endpoint-specific fields. Commission items remain generic records until their contract is stabilized.
 
 Detailed commission reports can also include `report.totalTrading` alongside `report.total`.
 
@@ -97,6 +97,12 @@ Quantities, prices, and position values are normalized to numbers, and `mkt_id` 
 ## Inbound and Outbound Transfers
 
 `in_outs` and `in_outs_securities` use the regular `report.detailed` structure. `InOutItem.type_id` provides autocomplete for observed cash values such as `bank`, `card`, `dividend`, and `tax`, while still accepting new strings returned by Tradernet. `amount` and `account_id` are normalized to numbers; `sum` stays the rendered string Tradernet puts in the report, such as `'3000 USD'`.
+
+`InOutSecuritiesItem` rows carry `date`, `account`, `quantity`, `ticker`, `isin`, `type`, and `comment`. Unlike `in_outs`, `date` includes the time (`'2024-10-11 15:00:00'`, no timezone), and there is no `type_id`: `type` is the localized cabinet label, such as `'Спліт'` for a split or `'Подарункові акції'` for promotional shares. `quantity` is normalized to a signed number; a split arrives as two rows, a negative debit of the old position and a positive credit of the new one. `comment` is passed through untrimmed and may start or end with a space; trim it yourself before display. The rows have no amount, currency, price, or `account_id`.
+
+Every row is validated: `date`, `account`, `ticker`, `isin`, and `type` must be non-empty strings and `comment` must be a string, otherwise the report fails with `Invalid in_outs_securities item at index N`. Match these rows to trades by `isin` rather than `ticker`, because a security's ticker can change.
+
+Both reports always return `report.total`: `in_outs` keys it by currency (`{ EUR: 3000 }`) and `in_outs_securities` by ticker (`{ 'PL.US': 1 }`). Tradernet sends an empty period's `total` as `[]`; the SDK normalizes it, like any empty `total`, `totalTrading`, or `securities` map, to `{}`.
 
 ## Trades
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Type `InOutSecuritiesItem` from a live `in_outs_securities` response instead of `Record<string, unknown>`: `date`, `account`, `quantity`, `ticker`, `isin`, `type`, and `comment`. `quantity` is normalized to a signed number. A row without a non-empty `date`, `account`, `ticker`, `isin`, and `type`, a string `comment`, or a numeric `quantity` is reported as `Invalid in_outs_securities item at index N`.
+- Normalize an empty `report.total`, `report.totalTrading`, or `report.securities` sent as `[]` to `{}`, so an empty `in_outs` or `in_outs_securities` period matches `ReportTotal`.
+
 ## 0.0.9 - 2026-09-25
 
 - `null` and `undefined` params are omitted from the request instead of being sent as the strings "null" and "undefined", which Tradernet rejects.

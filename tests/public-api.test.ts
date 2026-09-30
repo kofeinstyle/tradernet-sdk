@@ -15,6 +15,7 @@ import type {
   DetailedReportQueryType,
   FiatCurrency,
   InOutItem,
+  InOutSecuritiesItem,
   InOutType,
   KnownCorporateActionType,
   KnownFiatCurrency,
@@ -240,6 +241,20 @@ describe('Public API types', () => {
     }
 
     expect([item.type_id, unknownType]).toEqual(['bank', 'future_transfer_type'])
+  })
+
+  it('exports in-outs securities report types', () => {
+    const item: InOutSecuritiesItem = {
+      date: '2026-09-30 15:53:07',
+      account: 'trading',
+      quantity: 1,
+      ticker: 'KGC.US',
+      isin: 'CA4969024047',
+      type: 'Подарункові акції',
+      comment: ' Account credited with stocks: Promo 423:MAPLE5',
+    }
+
+    expect(item.quantity).toBe(1)
   })
 
   it('exports portfolio snapshot types', () => {

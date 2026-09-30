@@ -1,4 +1,9 @@
-import { normalizeCashFlowReportItem, normalizeCorporateActionsItem, normalizeSecuritiesFlowItem } from '../src/mappers'
+import {
+  normalizeCashFlowReportItem,
+  normalizeCorporateActionsItem,
+  normalizeInOutSecuritiesItem,
+  normalizeSecuritiesFlowItem,
+} from '../src/mappers'
 
 const makeCorporateActionsItem = (overrides: Record<string, unknown> = {}) => ({
   ticker: 'AAPL.US',
@@ -155,5 +160,45 @@ describe('normalizeSecuritiesFlowItem', () => {
 
   it('rejects unusable quantities', () => {
     expect(normalizeSecuritiesFlowItem(makeSecuritiesFlowItem({ quantity_at_end: 'n/a' }))).toBeNull()
+  })
+})
+
+describe('normalizeInOutSecuritiesItem', () => {
+  const makeInOutSecuritiesItem = (overrides: Record<string, unknown> = {}) => ({
+    date: '2024-10-11 15:00:00',
+    account: 'trading',
+    quantity: -137,
+    ticker: 'SCHD.US',
+    isin: 'US8085247976',
+    type: 'Спліт',
+    comment: ' Stock split SCHD.US (US8085247976). Record date 2024-10-10, factor: 1/3. ',
+    ...overrides,
+  })
+
+  it('keeps a live split debit unchanged', () => {
+    const item = makeInOutSecuritiesItem()
+
+    expect(normalizeInOutSecuritiesItem(item)).toStrictEqual(item)
+  })
+
+  it('normalizes a quantity delivered as a numeric string', () => {
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ quantity: '411' }))?.quantity).toBe(411)
+  })
+
+  it('rejects rows without a usable quantity', () => {
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ quantity: 'n/a' }))).toBeNull()
+    expect(normalizeInOutSecuritiesItem(null)).toBeNull()
+  })
+
+  it.each(['date', 'account', 'ticker', 'isin', 'type'])('rejects rows with a missing, null, or empty %s', field => {
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ [field]: undefined }))).toBeNull()
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ [field]: null }))).toBeNull()
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ [field]: ' ' }))).toBeNull()
+  })
+
+  it('requires a string comment but keeps it untrimmed', () => {
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ comment: undefined }))).toBeNull()
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ comment: null }))).toBeNull()
+    expect(normalizeInOutSecuritiesItem(makeInOutSecuritiesItem({ comment: ' Promo ' }))?.comment).toBe(' Promo ')
   })
 })

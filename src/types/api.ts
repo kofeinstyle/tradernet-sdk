@@ -130,6 +130,10 @@ export type ReportQueryFilter = {
 export type UnknownRecord = Record<string, unknown>
 export type CashTotal = UnknownRecord
 export type ReportProjectedTotal = UnknownRecord
+/**
+ * Numeric totals keyed by currency, such as `{ EUR: 3000 }` for `in_outs`, or by ticker, such as
+ * `{ 'PL.US': 1 }` for `in_outs_securities`. An empty period yields `{}`.
+ */
 export type ReportTotal = Record<string, number>
 export type UntypedReportItem = UnknownRecord
 export type CommissionItem = UntypedReportItem
