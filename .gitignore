@@ -5,3 +5,4 @@ coverage
 .env
 .env.local
 kofeinstyle-tradernet-*
+.claude/settings.local.json

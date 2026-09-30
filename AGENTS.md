@@ -45,7 +45,22 @@ Use PascalCase for exported classes, types, and enums, such as `TradernetApiClie
 
 Add tests under `tests/` using the `*.test.ts` naming pattern, for example `tests/helper.test.ts`. Prefer focused tests for mappers, helpers, request normalization, and public client behavior. If a test depends on credentials or API-like settings, route them through `tests/setup-env.js` and document required `.env` keys. Run `npm test` and `npm run check` before submitting changes.
 
+## Documentation Sync
+
+When a task changes public behavior (exports, method signatures, request params, response types, normalization), update the docs in the same commit, before committing:
+
+- `docs/*.md`: the relevant guide and `docs/api-reference.md`. Context7 indexes only `docs/`, so anything documented only in `README.md` never reaches it.
+- `context7.json` `rules`: add or adjust a rule when agents could misuse the new behavior (field shapes, values already normalized to numbers, matching keys, and so on). Keep rules short and factual.
+- `README.md`: only when the quick start or the feature list changes.
+- `CHANGELOG.md`: add a line under `## Unreleased` at the top, creating that section if it is missing. The release commit renames it to the version and date.
+
+Internal refactors, tests, tooling, and CI changes need no doc update.
+
+Before finishing a task, check the same list again, even if nothing was committed yet.
+
 ## Commit & Pull Request Guidelines
+
+Never add Co-Authored-By or "Generated with" trailers for AI agents.
 
 Recent history uses short, imperative or release-oriented messages, for example `update readme` and `0.0.1-beta.8 change report request filter`. Keep commits concise and scoped to one change.
 
